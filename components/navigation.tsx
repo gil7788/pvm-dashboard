@@ -16,11 +16,6 @@ export function Navigation() {
 
   return (
     <>
-      {/* Top Banner */}
-      <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-center py-2 text-sm">
-        Polkadot Benchmark Dashboard - Monitor Smart Contract Performance
-      </div>
-
       {/* Main Navigation */}
       <header className="border-b bg-white">
         <div className="container mx-auto px-4">
@@ -49,7 +44,7 @@ export function Navigation() {
               </nav>
             </div>
 
-            <Button variant="outline" className="border-pink-600 text-pink-600 hover:bg-pink-50">
+            <Button variant="outline" className="border-pink-600 text-pink-600 hover:bg-pink-50 bg-transparent">
               Connect Wallet
             </Button>
           </div>

@@ -8,19 +8,23 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Upload, Plus } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ArrowLeft, Upload, Plus, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function DeployPage() {
   const router = useRouter()
   const [isDeploying, setIsDeploying] = useState(false)
+  const [abiMismatchWarning, setAbiMismatchWarning] = useState(false)
   const [formData, setFormData] = useState({
     contractName: "",
-    contractAddress: "",
-    network: "",
+    chain: "",
+    solidityAddress: "",
+    solidityAbi: "",
+    inkAddress: "",
+    inkAbi: "",
     description: "",
   })
 
@@ -28,10 +32,33 @@ export default function DeployPage() {
     e.preventDefault()
     setIsDeploying(true)
 
+    // Check ABI compatibility
+    if (formData.solidityAbi && formData.inkAbi) {
+      try {
+        const solAbi = JSON.parse(formData.solidityAbi)
+        const inkAbi = JSON.parse(formData.inkAbi)
+
+        // Simple check for function name compatibility
+        const solFunctions = solAbi.filter((item: any) => item.type === "function").map((item: any) => item.name)
+        const inkMessages = inkAbi.spec?.messages?.map((msg: any) => msg.name) || []
+
+        const hasCommonFunctions = solFunctions.some((func: string) =>
+          inkMessages.some((msg: string) => func.toLowerCase() === msg.toLowerCase().replace("_", "")),
+        )
+
+        if (!hasCommonFunctions) {
+          setAbiMismatchWarning(true)
+        }
+      } catch (error) {
+        console.error("ABI parsing error:", error)
+      }
+    }
+
     // Simulate deployment process
     setTimeout(() => {
       setIsDeploying(false)
-      router.push("/contracts")
+      // Redirect to the newly created contract page
+      router.push("/contract/new-contract-id")
     }, 3000)
   }
 
@@ -52,8 +79,18 @@ export default function DeployPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+      {abiMismatchWarning && (
+        <Alert className="mb-6 border-yellow-200 bg-yellow-50">
+          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            <strong>ABI Mismatch Warning:</strong> The Solidity and ink! ABIs don't appear to have matching functions.
+            This may affect benchmarking capabilities, but you can still proceed with contract creation.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex justify-center">
+        <div className="w-full max-w-4xl">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -64,7 +101,7 @@ export default function DeployPage() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="contractName">Contract Name</Label>
+                  <Label htmlFor="contractName">Contract Name *</Label>
                   <Input
                     id="contractName"
                     placeholder="e.g., DeFi Swap Contract"
@@ -73,33 +110,78 @@ export default function DeployPage() {
                     required
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="contractAddress">Contract Address</Label>
-                  <Input
-                    id="contractAddress"
-                    placeholder="0x..."
-                    value={formData.contractAddress}
-                    onChange={(e) => setFormData({ ...formData, contractAddress: e.target.value })}
-                    required
-                  />
-                  <p className="text-sm text-gray-500">Enter the address of your already deployed smart contract</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="network">Network</Label>
-                  <Select onValueChange={(value) => setFormData({ ...formData, network: value })}>
+                  <Label htmlFor="chain">Chain *</Label>
+                  <Select onValueChange={(value) => setFormData({ ...formData, chain: value })}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a network" />
+                      <SelectValue placeholder="Select deployment chain" />
                     </SelectTrigger>
                     <SelectContent>
-                      {networks.map((network) => (
-                        <SelectItem key={network} value={network}>
-                          {network}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="passethub">Passethub</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Solidity Section */}
+                  <div className="space-y-4 border rounded-lg p-4">
+                    <h3 className="font-semibold text-blue-600 flex items-center">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                      Solidity Contract
+                    </h3>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="solidityAddress">Solidity Address</Label>
+                      <Input
+                        id="solidityAddress"
+                        placeholder="0x..."
+                        value={formData.solidityAddress}
+                        onChange={(e) => setFormData({ ...formData, solidityAddress: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="solidityAbi">Solidity ABI</Label>
+                      <Textarea
+                        id="solidityAbi"
+                        placeholder="Paste Solidity ABI JSON here..."
+                        value={formData.solidityAbi}
+                        onChange={(e) => setFormData({ ...formData, solidityAbi: e.target.value })}
+                        rows={6}
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* ink! Section */}
+                  <div className="space-y-4 border rounded-lg p-4">
+                    <h3 className="font-semibold text-green-600 flex items-center">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                      ink! Contract
+                    </h3>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="inkAddress">ink! Address</Label>
+                      <Input
+                        id="inkAddress"
+                        placeholder="5..."
+                        value={formData.inkAddress}
+                        onChange={(e) => setFormData({ ...formData, inkAddress: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="inkAbi">ink! ABI</Label>
+                      <Textarea
+                        id="inkAbi"
+                        placeholder="Paste ink! metadata JSON here..."
+                        value={formData.inkAbi}
+                        onChange={(e) => setFormData({ ...formData, inkAbi: e.target.value })}
+                        rows={6}
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -116,7 +198,7 @@ export default function DeployPage() {
                 <Button
                   type="submit"
                   className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
-                  disabled={isDeploying}
+                  disabled={isDeploying || (!formData.solidityAddress && !formData.inkAddress) || !formData.chain}
                 >
                   {isDeploying ? (
                     <>
@@ -131,47 +213,6 @@ export default function DeployPage() {
                   )}
                 </Button>
               </form>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Supported Networks</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {networks.map((network) => (
-                  <Badge key={network} variant="outline">
-                    {network}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>What happens next?</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="flex items-start space-x-2">
-                <div className="w-2 h-2 bg-pink-500 rounded-full mt-2"></div>
-                <p>Contract verification and validation</p>
-              </div>
-              <div className="flex items-start space-x-2">
-                <div className="w-2 h-2 bg-pink-500 rounded-full mt-2"></div>
-                <p>Bytecode analysis and extraction</p>
-              </div>
-              <div className="flex items-start space-x-2">
-                <div className="w-2 h-2 bg-pink-500 rounded-full mt-2"></div>
-                <p>Performance benchmarking setup</p>
-              </div>
-              <div className="flex items-start space-x-2">
-                <div className="w-2 h-2 bg-pink-500 rounded-full mt-2"></div>
-                <p>Dashboard integration and monitoring</p>
-              </div>
             </CardContent>
           </Card>
         </div>
