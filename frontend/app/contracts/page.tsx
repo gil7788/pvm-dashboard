@@ -3,7 +3,7 @@ import type { ContractMetadata } from "@/types/types"
 import { getBaseUrl } from "@/lib/env"
 
 async function getContracts(): Promise<ContractMetadata[]> {
-  const baseUrl = getBaseUrl()
+  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
 
   try {
     const res = await fetch(`${baseUrl}/api/contracts`, {

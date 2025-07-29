@@ -14,6 +14,8 @@ const envSchema = z.object({
   POLKADOT_API_KEY: z.string().optional().describe("Polkadot API key for blockchain interactions"),
 
   PASSETHUB_RPC_URL: z.string().url().optional().describe("Passethub RPC endpoint URL"),
+
+  NEXT_PUBLIC_BACKEND_URL: z.string().url().default("http://localhost:3001"),
 })
 
 // Parse and validate environment variables
@@ -25,6 +27,7 @@ function parseEnv() {
       DATABASE_URL: process.env.DATABASE_URL,
       POLKADOT_API_KEY: process.env.POLKADOT_API_KEY,
       PASSETHUB_RPC_URL: process.env.PASSETHUB_RPC_URL,
+      NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -42,6 +45,7 @@ function parseEnv() {
           DATABASE_URL: undefined,
           POLKADOT_API_KEY: undefined,
           PASSETHUB_RPC_URL: undefined,
+          NEXT_PUBLIC_BACKEND_URL: "http://localhost:3001",
         }
       }
 
@@ -81,4 +85,4 @@ export function validateEnv() {
 }
 
 // Export individual variables for convenience
-export const { NODE_ENV, NEXT_PUBLIC_BASE_URL, DATABASE_URL, POLKADOT_API_KEY, PASSETHUB_RPC_URL } = env
+export const { NODE_ENV, NEXT_PUBLIC_BASE_URL, DATABASE_URL, POLKADOT_API_KEY, PASSETHUB_RPC_URL, NEXT_PUBLIC_BACKEND_URL } = env

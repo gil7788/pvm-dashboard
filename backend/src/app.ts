@@ -2,11 +2,14 @@ import createError from 'http-errors';
 import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
-import logger from 'morgan';
+import morgan from 'morgan';
 import indexRouter from './routes/index';
 import usersRouter from './routes/users';
 import postsRouter from './routes/posts';
+import contractsRouter from './routes/contracts';
 import { connect } from './db/connect';
+import { requestLogger } from './middleware/requestLogger';
+import logger from './utils/Logger';
 
 const app = express();
 
@@ -14,7 +17,8 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(logger('dev'));
+app.use(morgan('dev'));
+app.use(requestLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -32,6 +36,7 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/posts', postsRouter);
+app.use('/api/contracts', contractsRouter);
 
 // Catch 404 and forward to error handler
 app.use(function (req: Request, res: Response, next: NextFunction) {

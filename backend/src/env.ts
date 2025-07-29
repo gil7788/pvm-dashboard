@@ -12,14 +12,14 @@ interface Config {
 
 const releaseConfig: Config = {
     dbName: process.env.DB_NAME || 'default_db_name',
-    port: process.env.PORT || '3000',
+    port: process.env.PORT || '3001',
     env: environment,
     connectionString: process.env.CONNECTION_STRING || "mongodb://localhost:27017",
 }
 
 const devConfig: Config = {
     dbName: getDevDatabaseName(process.env.DB_NAME || 'default_db_name'),
-    port: process.env.PORT || '3000',
+    port: process.env.PORT || '3001',
     env: environment,
     connectionString: "mongodb://localhost:27017",
 }
