@@ -6,7 +6,10 @@
     "build": "tsc && npm run copy-assets",
     "copy-assets": "cp -R public dist/src/public && cp -R views dist/src/views",
     "start": "node ./dist/bin/www",
-    "test": "npx jest"
+    "dev": "ts-node bin/www.ts",
+    "test": "npx jest",
+    "seed": "ts-node src/scripts/seedDatabase.ts",
+    "seed:prod": "node dist/src/scripts/seedDatabase.js"
   },
   "dependencies": {
     "axios": "^1.6.5",
@@ -17,6 +20,7 @@
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "mongodb": "^6.3.0",
+    "mongoose": "^8.16.5",
     "morgan": "~1.9.1",
     "winston": "^3.17.0"
   },

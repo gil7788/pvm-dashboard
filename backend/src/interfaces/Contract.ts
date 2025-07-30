@@ -1,12 +1,14 @@
 export interface ContractMetadata {
   id: string;
   name: string;
-  solidityAddress: string | null;
-  solidityDeployedTime: string | null;
-  inkAddress: string | null;
-  inkDeployedTime: string | null;
-  network: string;
+  // Keep frontend compatible fields
+  network: string; // For frontend compatibility - derived from networkInfo.name
   contractType: "solidity" | "ink" | "both";
+  // Latest deployment addresses for frontend compatibility
+  solidityAddress: string | null;
+  inkAddress: string | null;
+  solidityDeployedTime: string | null;
+  inkDeployedTime: string | null;
 }
 
 export interface ContractFunction {
@@ -56,16 +58,36 @@ export interface ContractData {
 
 export interface CreateContractRequest {
   name: string;
-  network: string;
+  ownerId: string;
+  networkId: string;
   contractType: "solidity" | "ink" | "both";
-  solidityAddress?: string;
-  inkAddress?: string;
+  sourceCodeHash?: string;
+  metadata?: {
+    description?: string;
+    version?: string;
+    tags?: string[];
+    sourceUrl?: string;
+    compiler?: {
+      name: string;
+      version: string;
+    };
+  };
 }
 
 export interface UpdateContractRequest {
   name?: string;
-  network?: string;
+  ownerId?: string;
+  networkId?: string;
   contractType?: "solidity" | "ink" | "both";
-  solidityAddress?: string;
-  inkAddress?: string;
+  sourceCodeHash?: string;
+  metadata?: {
+    description?: string;
+    version?: string;
+    tags?: string[];
+    sourceUrl?: string;
+    compiler?: {
+      name: string;
+      version: string;
+    };
+  };
 } 

@@ -35,9 +35,9 @@ describe('ContractService Tests', () => {
     it('should create a new contract', async () => {
       const contractData: CreateContractRequest = {
         name: 'Test Contract',
-        network: 'Passethub',
-        contractType: 'solidity',
-        solidityAddress: '0x1234...5678'
+        ownerId: '507f1f77bcf86cd799439011',
+        networkId: '507f1f77bcf86cd799439012',
+        contractType: 'solidity'
       };
 
       const newContract = await contractService.createContract(contractData);
@@ -52,9 +52,9 @@ describe('ContractService Tests', () => {
     it('should create contract with ink address', async () => {
       const contractData: CreateContractRequest = {
         name: 'Ink Contract',
-        network: 'Passethub',
-        contractType: 'ink',
-        inkAddress: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty'
+        ownerId: '507f1f77bcf86cd799439011',
+        networkId: '507f1f77bcf86cd799439012',
+        contractType: 'ink'
       };
 
       const newContract = await contractService.createContract(contractData);
@@ -67,7 +67,7 @@ describe('ContractService Tests', () => {
     it('should update existing contract', async () => {
       const updateData: UpdateContractRequest = {
         name: 'Updated Contract',
-        network: 'Passethub',
+        networkId: '507f1f77bcf86cd799439012',
         contractType: 'both'
       };
 

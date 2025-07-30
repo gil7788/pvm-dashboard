@@ -54,12 +54,38 @@ export default function DeployPage() {
       }
     }
 
-    // Simulate deployment process
-    setTimeout(() => {
+    try {
+      // Call the backend API to create the contract
+      const response = await fetch('/api/contracts/deploy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contractName: formData.contractName,
+          chain: formData.chain,
+          solidityAddress: formData.solidityAddress || null,
+          inkAddress: formData.inkAddress || null,
+          description: formData.description
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create contract')
+      }
+
+      const result = await response.json()
       setIsDeploying(false)
-      // Redirect to the newly created contract page
-      router.push("/contract/new-contract-id")
-    }, 3000)
+      
+      // Redirect to the contracts page to see the new contract
+      router.push("/contracts")
+    } catch (error) {
+      console.error("Error creating contract:", error)
+      setIsDeploying(false)
+      // You could add error state handling here
+      alert(`Error creating contract: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 
   const networks = ["AssetHub", "Moonbeam", "Astar", "Acala", "Parallel", "Centrifuge"]
@@ -117,7 +143,7 @@ export default function DeployPage() {
                       <SelectValue placeholder="Select deployment chain" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="passethub">Passethub</SelectItem>
+                      <SelectItem value="Passethub">Passethub</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

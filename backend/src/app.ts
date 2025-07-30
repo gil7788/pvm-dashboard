@@ -7,9 +7,14 @@ import indexRouter from './routes/index';
 import usersRouter from './routes/users';
 import postsRouter from './routes/posts';
 import contractsRouter from './routes/contracts';
-import { connect } from './db/connect';
+import benchmarksRouter from './routes/benchmarks';
+import networksRouter from './routes/networks';
+import deploymentsRouter from './routes/deployments';
+import MongoManager from './MongoManager';
+import { MongoService } from './services/MongoService';
 import { requestLogger } from './middleware/requestLogger';
 import logger from './utils/Logger';
+import config from './env';
 
 const app = express();
 
@@ -24,9 +29,20 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(async (req: Request, res: Response, next: NextFunction) => {
+// Initialize MongoDB connection
+const mongoManager = MongoManager.getInstance(config.connectionString, config.dbName);
+const mongoService = MongoService.getInstance(mongoManager);
+
+// Connect to MongoDB
+mongoManager.connect().then(() => {
+  logger.info('MongoDB connection established');
+}).catch((error) => {
+  logger.error('Failed to connect to MongoDB:', error);
+});
+
+app.use(async (req: Request & { mongoService?: any }, res: Response, next: NextFunction) => {
   try {
-    req.db = await connect();
+    req.mongoService = mongoService;
     next();
   } catch (error) {
     next(error);
@@ -36,7 +52,11 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/posts', postsRouter);
+app.use('/api', indexRouter);  // API base routes
 app.use('/api/contracts', contractsRouter);
+app.use('/api/benchmarks', benchmarksRouter);
+app.use('/api/networks', networksRouter);
+app.use('/api/deployments', deploymentsRouter);
 
 // Catch 404 and forward to error handler
 app.use(function (req: Request, res: Response, next: NextFunction) {
