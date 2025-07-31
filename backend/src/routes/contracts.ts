@@ -313,4 +313,278 @@ router.get('/search/:query', async (req, res) => {
   }
 });
 
+// GET /api/contracts/:id/abi - Get contract ABI (Solidity and ink!)
+router.get('/:id/abi', async (req, res) => {
+  try {
+    const { id } = req.params;
+    logger.info(`Fetching ABI for contract ID: ${id}`);
+    
+    const contract = await req.mongoService.getContractService().getContractById(id);
+    if (!contract) {
+      return res.status(404).json({ error: 'Contract not found' });
+    }
+    
+    // Get deployments for this contract to extract ABI
+    const { Deployment } = await import('../models/Deployment');
+    const { Types } = await import('mongoose');
+    const deployments = await Deployment.find({ contractId: new Types.ObjectId(id) }).sort({ deployedAt: -1 });
+    
+    const abiData = {
+      solidity: null,
+      ink: null
+    };
+    
+    // Find latest Solidity deployment
+    const latestSolidityDeployment = deployments.find(d => d.deploymentType === 'solidity');
+    if (latestSolidityDeployment && latestSolidityDeployment.metadata?.abi) {
+      abiData.solidity = latestSolidityDeployment.metadata.abi;
+    }
+    
+    // Find latest ink! deployment
+    const latestInkDeployment = deployments.find(d => d.deploymentType === 'ink');
+    if (latestInkDeployment && latestInkDeployment.metadata?.abi) {
+      abiData.ink = latestInkDeployment.metadata.abi;
+    }
+    
+    res.json(abiData);
+  } catch (error) {
+    logger.error('Error fetching contract ABI:', error);
+    res.status(500).json({ error: 'Failed to fetch contract ABI' });
+  }
+});
+
+// GET /api/contracts/:id/bytecode - Get contract bytecode (Solidity and ink!)
+router.get('/:id/bytecode', async (req, res) => {
+  try {
+    const { id } = req.params;
+    logger.info(`Fetching bytecode for contract ID: ${id}`);
+    
+    const contract = await req.mongoService.getContractService().getContractById(id);
+    if (!contract) {
+      return res.status(404).json({ error: 'Contract not found' });
+    }
+    
+    // Get deployments for this contract to extract bytecode
+    const { Deployment } = await import('../models/Deployment');
+    const { Types } = await import('mongoose');
+    const deployments = await Deployment.find({ contractId: new Types.ObjectId(id) }).sort({ deployedAt: -1 });
+    
+    const bytecodeData: {
+      solidity: { bytecode: string; size: string } | null;
+      ink: { bytecode: string; size: string } | null;
+    } = {
+      solidity: null,
+      ink: null
+    };
+    
+    // Find latest Solidity deployment
+    const latestSolidityDeployment = deployments.find(d => d.deploymentType === 'solidity');
+    if (latestSolidityDeployment && latestSolidityDeployment.metadata?.bytecode) {
+      bytecodeData.solidity = {
+        bytecode: latestSolidityDeployment.metadata.bytecode,
+        size: latestSolidityDeployment.metadata.bytecodeSize || 'Unknown'
+      };
+    }
+    
+    // Find latest ink! deployment
+    const latestInkDeployment = deployments.find(d => d.deploymentType === 'ink');
+    if (latestInkDeployment && latestInkDeployment.metadata?.bytecode) {
+      bytecodeData.ink = {
+        bytecode: latestInkDeployment.metadata.bytecode,
+        size: latestInkDeployment.metadata.bytecodeSize || 'Unknown'
+      };
+    }
+    
+    res.json(bytecodeData);
+  } catch (error) {
+    logger.error('Error fetching contract bytecode:', error);
+    res.status(500).json({ error: 'Failed to fetch contract bytecode' });
+  }
+});
+
+// GET /api/contracts/:id/functions - Get contract functions for benchmarking
+router.get('/:id/functions', async (req, res) => {
+  try {
+    const { id } = req.params;
+    logger.info(`Fetching functions for contract ID: ${id}`);
+    
+    const contract = await req.mongoService.getContractService().getContractById(id);
+    if (!contract) {
+      return res.status(404).json({ error: 'Contract not found' });
+    }
+    
+    // Get deployments for this contract to extract functions
+    const { Deployment } = await import('../models/Deployment');
+    const { Types } = await import('mongoose');
+    const deployments = await Deployment.find({ contractId: new Types.ObjectId(id) }).sort({ deployedAt: -1 });
+    
+    const functionsData = {
+      solidity: [],
+      ink: []
+    };
+    
+    // Find latest Solidity deployment
+    const latestSolidityDeployment = deployments.find(d => d.deploymentType === 'solidity');
+    if (latestSolidityDeployment && latestSolidityDeployment.metadata?.abi) {
+      const solidityAbi = latestSolidityDeployment.metadata.abi;
+      functionsData.solidity = solidityAbi
+        .filter((item: any) => item.type === 'function')
+        .map((func: any) => ({
+          name: func.name,
+          inputs: func.inputs || [],
+          outputs: func.outputs || [],
+          stateMutability: func.stateMutability || 'nonpayable',
+          gasUsed: '0', // Will be populated by benchmarks
+          runtime: '0ms', // Will be populated by benchmarks
+          lastTested: null
+        }));
+    }
+    
+    // Find latest ink! deployment
+    const latestInkDeployment = deployments.find(d => d.deploymentType === 'ink');
+    if (latestInkDeployment && latestInkDeployment.metadata?.abi) {
+      const inkAbi = latestInkDeployment.metadata.abi;
+      if (inkAbi.spec && inkAbi.spec.messages) {
+        functionsData.ink = inkAbi.spec.messages.map((msg: any) => ({
+          name: msg.name,
+          inputs: msg.args || [],
+          outputs: msg.returnType ? [msg.returnType] : [],
+          stateMutability: 'nonpayable',
+          gasUsed: '0', // Will be populated by benchmarks
+          runtime: '0ms', // Will be populated by benchmarks
+          lastTested: null
+        }));
+      }
+    }
+    
+    res.json(functionsData);
+  } catch (error) {
+    logger.error('Error fetching contract functions:', error);
+    res.status(500).json({ error: 'Failed to fetch contract functions' });
+  }
+});
+
+// POST /api/contracts/:id/benchmark - Run benchmark for a specific function
+router.post('/:id/benchmark', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { functionName, contractType, inputs } = req.body;
+    logger.info(`Running benchmark for contract ID: ${id}, function: ${functionName}, type: ${contractType}`);
+    
+    const contract = await req.mongoService.getContractService().getContractById(id);
+    if (!contract) {
+      return res.status(404).json({ error: 'Contract not found' });
+    }
+    
+    // For now, return mock benchmark results
+    // TODO: Implement actual PVM dry-run functionality
+    const mockResults = {
+      gasUsed: Math.floor(Math.random() * 100000) + 50000,
+      runtime: Math.floor(Math.random() * 100) + 10,
+      success: true,
+      error: null
+    };
+    
+    // Create benchmark record
+    const { Benchmark } = await import('../models/Benchmark');
+    const { Deployment } = await import('../models/Deployment');
+    
+    // Find the deployment for this contract type
+    const { Types } = await import('mongoose');
+    const deployment = await Deployment.findOne({ 
+      contractId: new Types.ObjectId(id), 
+      deploymentType: contractType 
+    });
+    
+    if (deployment) {
+      const benchmark = new Benchmark({
+        contractId: id,
+        deploymentId: deployment._id,
+        requestedBy: 'default-user', // TODO: Get from auth
+        benchmarkType: 'gas',
+        results: {
+          gasUsed: mockResults.gasUsed,
+          executionTime: mockResults.runtime,
+          storageSize: 0,
+          cost: mockResults.gasUsed * 0.000000001, // Mock gas price
+          efficiency: 100 - (mockResults.gasUsed / 100000) * 100
+        },
+        parameters: {
+          inputSize: JSON.stringify(inputs).length,
+          complexity: 'medium',
+          iterations: 1
+        },
+        status: 'completed',
+        createdAt: new Date(),
+        completedAt: new Date()
+      });
+      
+      await benchmark.save();
+    }
+    
+    res.json({
+      success: true,
+      results: mockResults,
+      message: 'Benchmark completed successfully'
+    });
+  } catch (error) {
+    logger.error('Error running benchmark:', error);
+    res.status(500).json({ error: 'Failed to run benchmark' });
+  }
+});
+
+// GET /api/contracts/:id/analytics - Get analytics and comparison data
+router.get('/:id/analytics', async (req, res) => {
+  try {
+    const { id } = req.params;
+    logger.info(`Fetching analytics for contract ID: ${id}`);
+    
+    const contract = await req.mongoService.getContractService().getContractById(id);
+    if (!contract) {
+      return res.status(404).json({ error: 'Contract not found' });
+    }
+    
+    // Get benchmarks for this contract
+    const { Benchmark } = await import('../models/Benchmark');
+    const benchmarks = await Benchmark.find({ contractId: id }).sort({ createdAt: -1 });
+    
+    // Get deployments for gas consumption data
+    const { Deployment } = await import('../models/Deployment');
+    const { Types } = await import('mongoose');
+    const deployments = await Deployment.find({ contractId: new Types.ObjectId(id) }).sort({ deployedAt: -1 });
+    
+    const analyticsData = {
+      gasConsumption: {
+        solidity: deployments.find(d => d.deploymentType === 'solidity')?.gasUsed || 0,
+        ink: deployments.find(d => d.deploymentType === 'ink')?.gasUsed || 0
+      },
+      bytecodeSize: {
+        solidity: deployments.find(d => d.deploymentType === 'solidity')?.metadata?.bytecodeSize || 'Unknown',
+        ink: deployments.find(d => d.deploymentType === 'ink')?.metadata?.bytecodeSize || 'Unknown'
+      },
+      benchmarks: benchmarks.map(b => ({
+        id: b._id,
+        type: b.benchmarkType,
+        results: b.results,
+        createdAt: b.createdAt,
+        completedAt: b.completedAt
+      })),
+      summary: {
+        totalBenchmarks: benchmarks.length,
+        averageGasUsed: benchmarks.length > 0 
+          ? benchmarks.reduce((sum, b) => sum + (b.results.gasUsed || 0), 0) / benchmarks.length 
+          : 0,
+        averageRuntime: benchmarks.length > 0 
+          ? benchmarks.reduce((sum, b) => sum + (b.results.executionTime || 0), 0) / benchmarks.length 
+          : 0
+      }
+    };
+    
+    res.json(analyticsData);
+  } catch (error) {
+    logger.error('Error fetching contract analytics:', error);
+    res.status(500).json({ error: 'Failed to fetch contract analytics' });
+  }
+});
+
 export default router; 

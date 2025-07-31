@@ -20,6 +20,10 @@ export interface IDeployment extends Document {
     verificationStatus?: 'verified' | 'unverified' | 'pending';
     contractSize?: number; // Size in bytes
     optimizationRuns?: number;
+    // ABI and bytecode for contract analysis
+    abi?: any; // Solidity ABI or ink! metadata
+    bytecode?: string; // Contract bytecode
+    bytecodeSize?: string; // Size of bytecode in bytes
   };
   createdAt: Date;
   updatedAt: Date;
@@ -168,6 +172,21 @@ const DeploymentSchema = new Schema<IDeployment>({
         message: 'Invalid verification status. Allowed values: verified, unverified, pending'
       },
       default: 'unverified'
+    },
+    // ABI and bytecode for contract analysis
+    abi: {
+      type: Schema.Types.Mixed, // Allow any type for ABI
+      default: null
+    },
+    bytecode: {
+      type: String,
+      trim: true,
+      default: null
+    },
+    bytecodeSize: {
+      type: String,
+      trim: true,
+      default: null
     }
   }
 }, {

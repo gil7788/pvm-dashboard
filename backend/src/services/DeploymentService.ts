@@ -1,6 +1,10 @@
 import { Deployment, IDeployment } from '../models/Deployment';
 import { CreateDeploymentRequest, UpdateDeploymentRequest, Deployment as DeploymentInterface } from '../interfaces/Deployment';
 import logger from '../utils/Logger';
+// Import all models to ensure they are registered
+import '../models/User';
+import '../models/Contract';
+import '../models/Network';
 
 export class DeploymentService {
   private mapDeploymentToInterface(deployment: IDeployment): DeploymentInterface {

@@ -53,3 +53,58 @@ export interface ContractData {
   solidity?: SolidityContract
   ink?: InkContract
 }
+
+// New interfaces for backend API responses
+export interface ContractABI {
+  solidity: any[] | null;
+  ink: any[] | null;
+}
+
+export interface ContractBytecode {
+  solidity: { bytecode: string; size: string } | null;
+  ink: { bytecode: string; size: string } | null;
+}
+
+export interface ContractFunction {
+  name: string;
+  inputs: any[];
+  outputs: any[];
+  stateMutability: string;
+  gasUsed: string;
+  runtime: string;
+  lastTested: string | null;
+}
+
+export interface ContractFunctions {
+  solidity: ContractFunction[];
+  ink: ContractFunction[];
+}
+
+export interface ContractAnalytics {
+  gasConsumption: {
+    solidity: number;
+    ink: number;
+  };
+  bytecodeSize: {
+    solidity: string;
+    ink: string;
+  };
+  benchmarks: Array<{
+    id: string;
+    type: string;
+    results: {
+      gasUsed: number;
+      executionTime: number;
+      storageSize: number;
+      cost: number;
+      efficiency: number;
+    };
+    createdAt: string;
+    completedAt: string;
+  }>;
+  summary: {
+    totalBenchmarks: number;
+    averageGasUsed: number;
+    averageRuntime: number;
+  };
+}

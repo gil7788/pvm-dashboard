@@ -269,7 +269,32 @@ async function seedDatabase() {
           metadata: {
             compilerVersion: '0.8.19',
             optimization: true,
-            verificationStatus: 'verified' as const
+            verificationStatus: 'verified' as const,
+            abi: [
+              {
+                "inputs": [],
+                "name": "getBalance",
+                "outputs": [{"name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+              },
+              {
+                "inputs": [{"name": "amount", "type": "uint256"}],
+                "name": "deposit",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+              },
+              {
+                "inputs": [{"name": "amount", "type": "uint256"}],
+                "name": "withdraw",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+              }
+            ],
+            bytecode: '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80632e1a7d4d1461003b578063d0e30db014610057575b600080fd5b610055600480360381019061005091906100c3565b610073565b005b610071600480360381019061006c91906100c3565b61007d565b005b8060008190555050565b8060008190555050565b600080fd5b6000819050919050565b6100a08161008d565b81146100ab57600080fd5b50565b6000813590506100bd81610097565b92915050565b6000602082840312156100d9576100d8610088565b5b60006100e7848285016100ae565b9150509291505056fea2646970667358221220a1b2c3d4e5f67890123456789012345678901234567890123456789012345678964736f6c63430008120033',
+            bytecodeSize: '512 bytes'
           }
         });
       }
@@ -296,7 +321,13 @@ async function seedDatabase() {
       }
     }
 
-    const createdDeployments = await Deployment.insertMany(deployments);
+    // Insert deployments one by one to ensure hooks are triggered
+    const createdDeployments = [];
+    for (const deploymentData of deployments) {
+      const deployment = new Deployment(deploymentData);
+      await deployment.save();
+      createdDeployments.push(deployment);
+    }
     logger.info(`Inserted ${createdDeployments.length} deployments`);
 
     // Create sample benchmarks with deployment references
