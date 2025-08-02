@@ -74,11 +74,68 @@ check_mongodb() {
         print_success "MongoDB is installed"
         return 0
     else
-        print_warning "MongoDB is not installed. Please install MongoDB first."
-        echo "Installation instructions:"
-        echo "  macOS: brew install mongodb-community"
-        echo "  Linux: sudo apt install mongodb"
-        echo "  Windows: Download from https://www.mongodb.com/try/download/community"
+        print_warning "MongoDB is not installed. Will attempt to install automatically."
+        return 1
+    fi
+}
+
+# Function to install MongoDB
+install_mongodb() {
+    print_status "Installing MongoDB..."
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        if command_exists brew; then
+            brew install mongodb-community
+            if [ $? -eq 0 ]; then
+                print_success "MongoDB installed successfully via Homebrew"
+                return 0
+            else
+                print_error "Failed to install MongoDB via Homebrew"
+                return 1
+            fi
+        else
+            print_error "Homebrew not found. Please install MongoDB manually:"
+            echo "  brew install mongodb-community"
+            return 1
+        fi
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux
+        print_status "Installing MongoDB on Linux..."
+        
+        # Update package list
+        sudo apt update
+        
+        # Install MongoDB
+        sudo apt install -y mongodb
+        
+        if [ $? -eq 0 ]; then
+            print_success "MongoDB installed successfully"
+            
+            # Start and enable MongoDB service
+            print_status "Starting MongoDB service..."
+            sudo systemctl start mongod
+            sudo systemctl enable mongod
+            
+            # Wait for MongoDB to start
+            sleep 3
+            
+            # Verify MongoDB is running
+            if sudo systemctl is-active --quiet mongod; then
+                print_success "MongoDB service is running"
+                return 0
+            else
+                print_warning "MongoDB service failed to start automatically"
+                print_warning "Please start it manually: sudo systemctl start mongod"
+                return 1
+            fi
+        else
+            print_error "Failed to install MongoDB"
+            return 1
+        fi
+    else
+        print_error "Unsupported operating system for automatic MongoDB installation"
+        print_warning "Please install MongoDB manually for your operating system"
         return 1
     fi
 }
@@ -90,19 +147,59 @@ start_mongodb() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
         if command_exists brew; then
-            brew services start mongodb-community 2>/dev/null || print_warning "Could not start MongoDB via brew. Please start it manually."
+            brew services start mongodb-community 2>/dev/null
+            if [ $? -eq 0 ]; then
+                print_success "MongoDB started successfully via Homebrew"
+            else
+                print_warning "Could not start MongoDB via brew. Please start it manually."
+                return 1
+            fi
         else
             print_warning "Please start MongoDB manually: brew services start mongodb-community"
+            return 1
         fi
     elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
         # Linux
-        sudo systemctl start mongod 2>/dev/null || print_warning "Could not start MongoDB via systemctl. Please start it manually."
+        sudo systemctl start mongod 2>/dev/null
+        if [ $? -eq 0 ]; then
+            print_success "MongoDB started successfully via systemctl"
+        else
+            print_warning "Could not start MongoDB via systemctl. Please start it manually."
+            return 1
+        fi
     else
         print_warning "Please start MongoDB manually for your operating system."
+        return 1
     fi
     
     # Wait a moment for MongoDB to start
     sleep 3
+    
+    # Verify MongoDB is running
+    if command_exists mongod; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS - check if process is running
+            if pgrep -f mongod > /dev/null; then
+                print_success "MongoDB is running"
+                return 0
+            else
+                print_warning "MongoDB process not found"
+                return 1
+            fi
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Linux - check systemctl status
+            if sudo systemctl is-active --quiet mongod; then
+                print_success "MongoDB service is active"
+                return 0
+            else
+                print_warning "MongoDB service is not active"
+                return 1
+            fi
+        fi
+    else
+        print_warning "MongoDB not found in PATH"
+        return 1
+    fi
 }
 
 # Function to install dependencies
@@ -198,6 +295,40 @@ seed_database() {
     fi
     
     cd ..
+}
+
+# Function to verify MongoDB connectivity
+verify_mongodb_connection() {
+    print_status "Verifying MongoDB connection..."
+    
+    # Try to connect to MongoDB using mongosh or mongo
+    if command_exists mongosh; then
+        if mongosh --eval "db.runCommand('ping')" > /dev/null 2>&1; then
+            print_success "MongoDB connection verified"
+            return 0
+        fi
+    elif command_exists mongo; then
+        if mongo --eval "db.runCommand('ping')" > /dev/null 2>&1; then
+            print_success "MongoDB connection verified"
+            return 0
+        fi
+    else
+        # If no MongoDB client is available, just check if the service is running
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            if sudo systemctl is-active --quiet mongod; then
+                print_success "MongoDB service is running"
+                return 0
+            fi
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            if pgrep -f mongod > /dev/null; then
+                print_success "MongoDB process is running"
+                return 0
+            fi
+        fi
+    fi
+    
+    print_warning "Could not verify MongoDB connection"
+    return 1
 }
 
 # Function to check if ports are available
@@ -313,10 +444,42 @@ main() {
             print_status "Checking prerequisites..."
             check_node_version || exit 1
             check_npm_version || exit 1
-            check_mongodb || print_warning "MongoDB check failed, but continuing..."
             
-            # Start MongoDB if possible
-            start_mongodb
+            # Check and install MongoDB if needed
+            if ! check_mongodb; then
+                print_status "MongoDB not found, attempting to install..."
+                if install_mongodb; then
+                    print_success "MongoDB installed and configured successfully"
+                else
+                    print_error "Failed to install MongoDB automatically"
+                    print_warning "Please install MongoDB manually and try again"
+                    exit 1
+                fi
+            else
+                # MongoDB is installed, try to start it
+                if ! start_mongodb; then
+                    print_warning "MongoDB is installed but failed to start automatically"
+                    if [[ "$OSTYPE" == "darwin"* ]]; then
+                        print_warning "On macOS, MongoDB might already be running or need manual start"
+                        print_warning "If the application fails later, start MongoDB manually:"
+                        print_warning "  brew services start mongodb-community"
+                        # Continue anyway on macOS as MongoDB might be running differently
+                    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+                        print_warning "On Linux, try: sudo systemctl start mongod"
+                        exit 1
+                    fi
+                fi
+            fi
+            
+            # Verify MongoDB connection
+            if ! verify_mongodb_connection; then
+                print_warning "MongoDB connection verification failed"
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                    print_warning "On macOS, MongoDB might already be running"
+                    print_warning "If the application fails later, start MongoDB manually:"
+                    print_warning "  brew services start mongodb-community"
+                fi
+            fi
             
             # Install dependencies
             install_dependencies

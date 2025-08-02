@@ -61,11 +61,12 @@ chmod +x setup.sh
 ```
 
 The script will:
-- ✅ Check prerequisites (Node.js, npm, MongoDB)
+- ✅ Check prerequisites (Node.js, npm)
+- ✅ Install MongoDB automatically (macOS/Linux)
 - ✅ Install all dependencies
 - ✅ Create environment files
 - ✅ Seed the database with sample data
-- ✅ Start MongoDB if possible
+- ✅ Start MongoDB automatically
 
 After installation, start the application:
 ```bash
