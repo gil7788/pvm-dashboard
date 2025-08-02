@@ -255,6 +255,27 @@ brew install lsof
 sudo apt install lsof
 ```
 
+#### 6. Dependency Issues (stack-trace module)
+```
+Error: Cannot find module 'stack-trace'
+```
+**Solution**: Run the dependency fix script:
+```bash
+chmod +x fix-dependencies.sh
+./fix-dependencies.sh
+```
+
+This script will:
+- Remove corrupted modules
+- Perform clean installs
+- Install specific versions of problematic packages
+- Fix winston logging dependencies
+
+After running the fix script, try the setup again:
+```bash
+./setup.sh install
+```
+
 ### Setup Script Commands
 
 ```bash

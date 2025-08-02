@@ -109,14 +109,48 @@ start_mongodb() {
 install_dependencies() {
     print_status "Installing backend dependencies..."
     cd backend
+    
+    # Clean install to avoid dependency conflicts
+    rm -rf node_modules package-lock.json
     npm install
+    if [ $? -ne 0 ]; then
+        print_warning "First install failed, trying with --force..."
+        npm install --force
+        if [ $? -ne 0 ]; then
+            print_error "Failed to install backend dependencies"
+            exit 1
+        fi
+    fi
+    cd ..
     
     print_status "Installing frontend dependencies..."
-    cd ../frontend
+    cd frontend
     npm install
+    cd ..
+    
+    print_success "Dependencies installed successfully"
+}
+
+# Function to fix common dependency issues
+fix_dependency_issues() {
+    print_status "Checking for common dependency issues..."
+    
+    cd backend
+    
+    # Fix stack-trace module issue
+    if [ -d "node_modules/stack-trace" ] && [ ! -f "node_modules/stack-trace/package.json" ]; then
+        print_warning "Fixing corrupted stack-trace module..."
+        rm -rf node_modules/stack-trace
+        npm install stack-trace@latest
+    fi
+    
+    # Fix winston dependency issues
+    if [ -d "node_modules/winston" ]; then
+        print_warning "Ensuring winston dependencies are correct..."
+        npm install winston@latest
+    fi
     
     cd ..
-    print_success "Dependencies installed successfully"
 }
 
 # Function to create environment file
@@ -139,9 +173,31 @@ EOF
 seed_database() {
     print_status "Seeding database with sample data..."
     cd backend
+    
+    # Try to fix stack-trace issue if it exists
+    if [ -d "node_modules/stack-trace" ]; then
+        print_warning "Fixing stack-trace module issue..."
+        rm -rf node_modules/stack-trace
+        npm install stack-trace@latest
+    fi
+    
+    # Try seeding with error handling
     npm run seed
+    if [ $? -ne 0 ]; then
+        print_warning "Seeding failed, trying alternative approach..."
+        # Try running the script directly with ts-node
+        npx ts-node src/scripts/seedDatabase.ts
+        if [ $? -ne 0 ]; then
+            print_error "Failed to seed database"
+            print_warning "You can try seeding manually later with: cd backend && npm run seed"
+        else
+            print_success "Database seeded successfully (alternative method)"
+        fi
+    else
+        print_success "Database seeded successfully"
+    fi
+    
     cd ..
-    print_success "Database seeded successfully"
 }
 
 # Function to check if ports are available
@@ -264,6 +320,9 @@ main() {
             
             # Install dependencies
             install_dependencies
+            
+            # Fix common dependency issues
+            fix_dependency_issues
             
             # Create environment file
             create_env_file
