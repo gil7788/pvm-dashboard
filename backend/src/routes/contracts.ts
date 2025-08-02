@@ -10,12 +10,12 @@ function generateUniqueTransactionHash(): string {
 }
 
 // Type for requests with mongoService
-interface RequestWithService extends express.Request {
+type RequestWithService = express.Request & {
   mongoService: any;
 }
 
 // GET /api/contracts - Get all contracts
-router.get('/', async (req: RequestWithService, res) => {
+router.get('/', async (req: any, res) => {
   try {
     logger.info('Fetching all contracts');
     const contracts = await req.mongoService.getContractService().getAllContracts();
@@ -27,7 +27,7 @@ router.get('/', async (req: RequestWithService, res) => {
 });
 
 // GET /api/contracts/:id - Get contract by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
     logger.info(`Fetching contract with ID: ${id}`);
@@ -45,7 +45,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/contracts - Create new contract
-router.post('/', async (req, res) => {
+router.post('/', async (req: any, res) => {
   try {
     const contractData: CreateContractRequest = req.body;
     logger.info('Creating new contract:', contractData);
@@ -66,7 +66,7 @@ router.post('/', async (req, res) => {
 });
 
 // POST /api/contracts/deploy - Create contract from frontend deployment form
-router.post('/deploy', async (req, res) => {
+router.post('/deploy', async (req: any, res) => {
   try {
     const { contractName, chain, solidityAddress, inkAddress, description } = req.body;
     logger.info('Creating contract from deployment form:', { contractName, chain, solidityAddress, inkAddress });
@@ -203,7 +203,7 @@ router.post('/deploy', async (req, res) => {
 });
 
 // PUT /api/contracts/:id - Update contract
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
     const updateData: UpdateContractRequest = req.body;
@@ -222,7 +222,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/contracts/:id - Delete contract
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
     logger.info(`Deleting contract with ID: ${id}`);
@@ -240,7 +240,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // GET /api/contracts/network/:networkId - Get contracts by network ID
-router.get('/network/:networkId', async (req, res) => {
+router.get('/network/:networkId', async (req: any, res) => {
   try {
     const { networkId } = req.params;
     logger.info(`Fetching contracts for network ID: ${networkId}`);
@@ -254,7 +254,7 @@ router.get('/network/:networkId', async (req, res) => {
 });
 
 // GET /api/contracts/owner/:ownerId - Get contracts by owner ID
-router.get('/owner/:ownerId', async (req, res) => {
+router.get('/owner/:ownerId', async (req: any, res) => {
   try {
     const { ownerId } = req.params;
     logger.info(`Fetching contracts for owner ID: ${ownerId}`);
@@ -268,7 +268,7 @@ router.get('/owner/:ownerId', async (req, res) => {
 });
 
 // GET /api/contracts/tag/:tag - Get contracts by tag
-router.get('/tag/:tag', async (req, res) => {
+router.get('/tag/:tag', async (req: any, res) => {
   try {
     const { tag } = req.params;
     logger.info(`Fetching contracts with tag: ${tag}`);
@@ -282,7 +282,7 @@ router.get('/tag/:tag', async (req, res) => {
 });
 
 // GET /api/contracts/type/:type - Get contracts by type
-router.get('/type/:type', async (req, res) => {
+router.get('/type/:type', async (req: any, res) => {
   try {
     const { type } = req.params;
     logger.info(`Fetching contracts of type: ${type}`);
@@ -300,7 +300,7 @@ router.get('/type/:type', async (req, res) => {
 });
 
 // GET /api/contracts/search/:query - Search contracts
-router.get('/search/:query', async (req, res) => {
+router.get('/search/:query', async (req: any, res) => {
   try {
     const { query } = req.params;
     logger.info(`Searching contracts with query: ${query}`);
@@ -314,7 +314,7 @@ router.get('/search/:query', async (req, res) => {
 });
 
 // GET /api/contracts/:id/abi - Get contract ABI (Solidity and ink!)
-router.get('/:id/abi', async (req, res) => {
+router.get('/:id/abi', async (req: any, res) => {
   try {
     const { id } = req.params;
     logger.info(`Fetching ABI for contract ID: ${id}`);
@@ -354,7 +354,7 @@ router.get('/:id/abi', async (req, res) => {
 });
 
 // GET /api/contracts/:id/bytecode - Get contract bytecode (Solidity and ink!)
-router.get('/:id/bytecode', async (req, res) => {
+router.get('/:id/bytecode', async (req: any, res) => {
   try {
     const { id } = req.params;
     logger.info(`Fetching bytecode for contract ID: ${id}`);
@@ -403,7 +403,7 @@ router.get('/:id/bytecode', async (req, res) => {
 });
 
 // GET /api/contracts/:id/functions - Get contract functions for benchmarking
-router.get('/:id/functions', async (req, res) => {
+router.get('/:id/functions', async (req: any, res) => {
   try {
     const { id } = req.params;
     logger.info(`Fetching functions for contract ID: ${id}`);
@@ -465,7 +465,7 @@ router.get('/:id/functions', async (req, res) => {
 });
 
 // POST /api/contracts/:id/benchmark - Run benchmark for a specific function
-router.post('/:id/benchmark', async (req, res) => {
+router.post('/:id/benchmark', async (req: any, res) => {
   try {
     const { id } = req.params;
     const { functionName, contractType, inputs } = req.body;
@@ -534,7 +534,7 @@ router.post('/:id/benchmark', async (req, res) => {
 });
 
 // GET /api/contracts/:id/analytics - Get analytics and comparison data
-router.get('/:id/analytics', async (req, res) => {
+router.get('/:id/analytics', async (req: any, res) => {
   try {
     const { id } = req.params;
     logger.info(`Fetching analytics for contract ID: ${id}`);

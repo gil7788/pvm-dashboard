@@ -5,7 +5,7 @@ import logger from '../utils/Logger';
 const router = express.Router();
 
 // GET /api/deployments - Get all deployments
-router.get('/', async (req, res) => {
+router.get('/', async (req: any, res) => {
   try {
     logger.info('Fetching all deployments');
     const deployments = await req.mongoService.getDeploymentService().getAllDeployments();
@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/deployments/:id - Get deployment by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
     logger.info(`Fetching deployment with ID: ${id}`);
@@ -35,7 +35,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/deployments - Create new deployment
-router.post('/', async (req, res) => {
+router.post('/', async (req: any, res) => {
   try {
     const deploymentData: CreateDeploymentRequest = req.body;
     logger.info('Creating new deployment:', deploymentData);
@@ -57,7 +57,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/deployments/:id - Update deployment
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
     const updateData: UpdateDeploymentRequest = req.body;
@@ -76,7 +76,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/deployments/:id - Delete deployment
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
     logger.info(`Deleting deployment with ID: ${id}`);
@@ -94,7 +94,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // GET /api/deployments/contract/:contractId - Get deployments by contract
-router.get('/contract/:contractId', async (req, res) => {
+router.get('/contract/:contractId', async (req: any, res) => {
   try {
     const { contractId } = req.params;
     logger.info(`Fetching deployments for contract ID: ${contractId}`);
@@ -108,7 +108,7 @@ router.get('/contract/:contractId', async (req, res) => {
 });
 
 // GET /api/deployments/network/:networkId - Get deployments by network
-router.get('/network/:networkId', async (req, res) => {
+router.get('/network/:networkId', async (req: any, res) => {
   try {
     const { networkId } = req.params;
     logger.info(`Fetching deployments for network ID: ${networkId}`);
@@ -122,7 +122,7 @@ router.get('/network/:networkId', async (req, res) => {
 });
 
 // GET /api/deployments/deployer/:deployerId - Get deployments by deployer
-router.get('/deployer/:deployerId', async (req, res) => {
+router.get('/deployer/:deployerId', async (req: any, res) => {
   try {
     const { deployerId } = req.params;
     logger.info(`Fetching deployments for deployer ID: ${deployerId}`);
@@ -136,7 +136,7 @@ router.get('/deployer/:deployerId', async (req, res) => {
 });
 
 // GET /api/deployments/type/:type - Get deployments by type
-router.get('/type/:type', async (req, res) => {
+router.get('/type/:type', async (req: any, res) => {
   try {
     const { type } = req.params;
     logger.info(`Fetching deployments of type: ${type}`);
@@ -154,7 +154,7 @@ router.get('/type/:type', async (req, res) => {
 });
 
 // GET /api/deployments/status/:status - Get deployments by status
-router.get('/status/:status', async (req, res) => {
+router.get('/status/:status', async (req: any, res) => {
   try {
     const { status } = req.params;
     logger.info(`Fetching deployments with status: ${status}`);
@@ -172,7 +172,7 @@ router.get('/status/:status', async (req, res) => {
 });
 
 // PUT /api/deployments/:id/verify - Update verification status
-router.put('/:id/verify', async (req, res) => {
+router.put('/:id/verify', async (req: any, res) => {
   try {
     const { id } = req.params;
     const { verificationStatus } = req.body;

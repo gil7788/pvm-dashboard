@@ -6,7 +6,7 @@ import logger from '../utils/Logger';
 const router = express.Router();
 
 // GET /api/benchmarks - Get all benchmarks
-router.get('/', async (req, res) => {
+router.get('/', async (req: any, res) => {
   try {
     logger.info('Fetching all benchmarks');
     const benchmarks = await req.mongoService.getBenchmarkService().getAllBenchmarks();
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/benchmarks/:id - Get benchmark by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
     logger.info(`Fetching benchmark with ID: ${id}`);
@@ -36,7 +36,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/benchmarks - Create new benchmark
-router.post('/', async (req, res) => {
+router.post('/', async (req: any, res) => {
   try {
     const benchmarkData: CreateBenchmarkRequest = req.body;
     logger.info('Creating new benchmark:', benchmarkData);
@@ -57,7 +57,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/benchmarks/:id - Update benchmark
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
     const updateData: UpdateBenchmarkRequest = req.body;
@@ -76,7 +76,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/benchmarks/:id - Delete benchmark
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
     logger.info(`Deleting benchmark with ID: ${id}`);
@@ -94,7 +94,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // GET /api/benchmarks/contract/:contractId - Get benchmarks by contract
-router.get('/contract/:contractId', async (req, res) => {
+router.get('/contract/:contractId', async (req: any, res) => {
   try {
     const { contractId } = req.params;
     logger.info(`Fetching benchmarks for contract ID: ${contractId}`);
@@ -108,7 +108,7 @@ router.get('/contract/:contractId', async (req, res) => {
 });
 
 // GET /api/benchmarks/deployment/:deploymentId - Get benchmarks by deployment
-router.get('/deployment/:deploymentId', async (req, res) => {
+router.get('/deployment/:deploymentId', async (req: any, res) => {
   try {
     const { deploymentId } = req.params;
     logger.info(`Fetching benchmarks for deployment ID: ${deploymentId}`);
@@ -122,7 +122,7 @@ router.get('/deployment/:deploymentId', async (req, res) => {
 });
 
 // GET /api/benchmarks/user/:userId - Get benchmarks by user
-router.get('/user/:userId', async (req, res) => {
+router.get('/user/:userId', async (req: any, res) => {
   try {
     const { userId } = req.params;
     logger.info(`Fetching benchmarks for user ID: ${userId}`);
@@ -136,7 +136,7 @@ router.get('/user/:userId', async (req, res) => {
 });
 
 // GET /api/benchmarks/type/:type - Get benchmarks by type
-router.get('/type/:type', async (req, res) => {
+router.get('/type/:type', async (req: any, res) => {
   try {
     const { type } = req.params;
     logger.info(`Fetching benchmarks of type: ${type}`);
@@ -154,7 +154,7 @@ router.get('/type/:type', async (req, res) => {
 });
 
 // GET /api/benchmarks/status/:status - Get benchmarks by status
-router.get('/status/:status', async (req, res) => {
+router.get('/status/:status', async (req: any, res) => {
   try {
     const { status } = req.params;
     logger.info(`Fetching benchmarks with status: ${status}`);
@@ -172,7 +172,7 @@ router.get('/status/:status', async (req, res) => {
 });
 
 // GET /api/benchmarks/search/:query - Search benchmarks
-router.get('/search/:query', async (req, res) => {
+router.get('/search/:query', async (req: any, res) => {
   try {
     const { query } = req.params;
     logger.info(`Searching benchmarks with query: ${query}`);
@@ -188,7 +188,7 @@ router.get('/search/:query', async (req, res) => {
 // === BENCHMARK RUN ROUTES ===
 
 // GET /api/benchmarks/:benchmarkId/runs - Get all runs for a benchmark
-router.get('/:benchmarkId/runs', async (req, res) => {
+router.get('/:benchmarkId/runs', async (req: any, res) => {
   try {
     const { benchmarkId } = req.params;
     logger.info(`Fetching runs for benchmark ID: ${benchmarkId}`);
@@ -202,7 +202,7 @@ router.get('/:benchmarkId/runs', async (req, res) => {
 });
 
 // POST /api/benchmarks/:benchmarkId/runs - Execute a new benchmark run
-router.post('/:benchmarkId/runs', async (req, res) => {
+router.post('/:benchmarkId/runs', async (req: any, res) => {
   try {
     const { benchmarkId } = req.params;
     const runData = req.body;
@@ -217,7 +217,7 @@ router.post('/:benchmarkId/runs', async (req, res) => {
 });
 
 // GET /api/benchmarks/:benchmarkId/stats - Get benchmark statistics
-router.get('/:benchmarkId/stats', async (req, res) => {
+router.get('/:benchmarkId/stats', async (req: any, res) => {
   try {
     const { benchmarkId } = req.params;
     logger.info(`Fetching stats for benchmark ID: ${benchmarkId}`);
@@ -231,7 +231,7 @@ router.get('/:benchmarkId/stats', async (req, res) => {
 });
 
 // GET /api/benchmarks/:benchmarkId/average - Get average results for a benchmark
-router.get('/:benchmarkId/average', async (req, res) => {
+router.get('/:benchmarkId/average', async (req: any, res) => {
   try {
     const { benchmarkId } = req.params;
     logger.info(`Fetching average results for benchmark ID: ${benchmarkId}`);

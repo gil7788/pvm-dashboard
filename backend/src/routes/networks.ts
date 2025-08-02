@@ -7,7 +7,7 @@ const router = express.Router();
 const networkService = new NetworkService();
 
 // GET /api/networks - Get all networks
-router.get('/', async (req, res) => {
+router.get('/', async (req: any, res) => {
   try {
     const networks = await networkService.getAllNetworks();
     res.json(networks);
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/networks/:id - Get network by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: any, res) => {
   try {
     const network = await networkService.getNetworkById(req.params.id);
     if (!network) {
@@ -32,7 +32,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/networks - Create new network
-router.post('/', async (req, res) => {
+router.post('/', async (req: any, res) => {
   try {
     const networkData: CreateNetworkRequest = req.body;
     
@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/networks/:id - Update network
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: any, res) => {
   try {
     const updateData: UpdateNetworkRequest = req.body;
     const updatedNetwork = await networkService.updateNetwork(req.params.id, updateData);
@@ -69,7 +69,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/networks/:id - Delete network
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: any, res) => {
   try {
     const deleted = await networkService.deleteNetwork(req.params.id);
     
@@ -85,7 +85,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // GET /api/networks/status/:status - Get networks by status
-router.get('/status/:status', async (req, res) => {
+router.get('/status/:status', async (req: any, res) => {
   try {
     const status = req.params.status as "active" | "inactive" | "maintenance";
     const networks = await networkService.getNetworksByStatus(status);
@@ -97,7 +97,7 @@ router.get('/status/:status', async (req, res) => {
 });
 
 // GET /api/networks/feature/:feature - Get networks by feature
-router.get('/feature/:feature', async (req, res) => {
+router.get('/feature/:feature', async (req: any, res) => {
   try {
     const feature = req.params.feature as "solidity" | "ink" | "evm" | "wasm";
     const networks = await networkService.getNetworksByFeature(feature);
@@ -109,7 +109,7 @@ router.get('/feature/:feature', async (req, res) => {
 });
 
 // GET /api/networks/search/:query - Search networks
-router.get('/search/:query', async (req, res) => {
+router.get('/search/:query', async (req: any, res) => {
   try {
     const networks = await networkService.searchNetworks(req.params.query);
     res.json(networks);
@@ -120,7 +120,7 @@ router.get('/search/:query', async (req, res) => {
 });
 
 // GET /api/networks/active - Get active networks
-router.get('/active', async (req, res) => {
+router.get('/active', async (req: any, res) => {
   try {
     const networks = await networkService.getActiveNetworks();
     res.json(networks);

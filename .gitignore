@@ -35,9 +35,12 @@ next-env.d.ts
 # Logs
 logs/
 *.log
+backend.log
+frontend.log
 
 # Runtime data
 pids
+.pids
 *.pid
 *.seed
 *.pid.lock

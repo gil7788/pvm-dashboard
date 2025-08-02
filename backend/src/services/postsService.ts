@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { connect } from '../db/connect';
 import { ObjectId } from 'mongodb';
 
-export async function getPosts(req: Request, res: Response, next: NextFunction) {
+export async function getPosts(req: any, res: Response, next: NextFunction) {
   try {
     const collection = req.db.collection("posts");
     const results = await collection.find({}).limit(50).toArray();
@@ -12,7 +12,7 @@ export async function getPosts(req: Request, res: Response, next: NextFunction) 
   }
 }
 
-export async function getLatestPosts(req: Request, res: Response, next: NextFunction) {
+export async function getLatestPosts(req: any, res: Response, next: NextFunction) {
   try {
     const collection = req.db.collection("posts");
     const results = await collection.aggregate([
@@ -26,7 +26,7 @@ export async function getLatestPosts(req: Request, res: Response, next: NextFunc
   }
 }
 
-export async function getSinglePost(req: Request, res: Response, next: NextFunction) {
+export async function getSinglePost(req: any, res: Response, next: NextFunction) {
   try {
     const collection = req.db.collection("posts");
     const query = { _id: new ObjectId(req.params.id) };
@@ -39,7 +39,7 @@ export async function getSinglePost(req: Request, res: Response, next: NextFunct
   }
 }
 
-export async function addNewPost(req: Request, res: Response, next: NextFunction) {
+export async function addNewPost(req: any, res: Response, next: NextFunction) {
   try {
     const collection = req.db.collection("posts");
     const newDocument = req.body;
@@ -51,7 +51,7 @@ export async function addNewPost(req: Request, res: Response, next: NextFunction
   }
 }
 
-export async function addCommentToPost(req: Request, res: Response, next: NextFunction) {
+export async function addCommentToPost(req: any, res: Response, next: NextFunction) {
   try {
     const collection = req.db.collection("posts");
     const query = { _id: new ObjectId(req.params.id) };
@@ -63,7 +63,7 @@ export async function addCommentToPost(req: Request, res: Response, next: NextFu
   }
 }
 
-export async function deletePostById(req: Request, res: Response, next: NextFunction) {
+export async function deletePostById(req: any, res: Response, next: NextFunction) {
   try {
     const collection = req.db.collection("posts");
     const query = { _id: new ObjectId(req.params.id) };
