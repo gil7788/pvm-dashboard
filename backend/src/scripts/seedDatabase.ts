@@ -378,7 +378,7 @@ async function seedDatabase() {
     logger.info('Starting database seeding with simplified model...');
     
     // Connect to MongoDB
-    const mongoUri = 'mongodb://localhost:27017/dev_pvm-dashboard';
+    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/dev_pvm-dashboard';
     await mongoose.connect(mongoUri);
     logger.info('Connected to MongoDB');
     

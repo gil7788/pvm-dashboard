@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: dev_pvm-dashboard
+    
+
+
+  backend:
+    build: ./backend
+    environment:
+      # - NODE_ENV=production
+      - MONGO_URI=mongodb://mongo:27017/dev_pvm-dashboard
+      - PORT=3001
+    depends_on:
+      - mongo
+    ports:
+      - "3001:3001"
+    volumes:
+      - backend_logs:/usr/src/app/logs
+    
+  
+  frontend:
+    build: ./frontend
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://backend:3001
+    depends_on:
+      - backend
+    ports:
+      - "80:3000"
+
+    
+volumes:
+  mongo_data:
+  backend_logs:
