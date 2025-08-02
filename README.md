@@ -12,7 +12,7 @@ A comprehensive smart contract benchmarking dashboard for the Polkadot ecosystem
 
 ## 🏗️ Architecture
 
-- **Frontend**: Next.js 14 with TypeScript, Tailwind CSS, and shadcn/ui components
+- **Frontend**: Next.js 15 with TypeScript, Tailwind CSS, and shadcn/ui components
 - **Backend**: Node.js with Express, TypeScript, and MongoDB
 - **Database**: MongoDB with Mongoose ODM
 - **API**: RESTful API with comprehensive endpoints
