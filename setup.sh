@@ -106,31 +106,46 @@ install_mongodb() {
         # Update package list
         sudo apt update
         
-        # Install MongoDB
-        sudo apt install -y mongodb
-        
-        if [ $? -eq 0 ]; then
-            print_success "MongoDB installed successfully"
+        # Try to install MongoDB from default repositories first
+        if sudo apt install -y mongodb 2>/dev/null; then
+            print_success "MongoDB installed successfully from default repositories"
+        else
+            print_warning "MongoDB not available in default repositories, installing from official MongoDB repository..."
             
-            # Start and enable MongoDB service
-            print_status "Starting MongoDB service..."
-            sudo systemctl start mongod
-            sudo systemctl enable mongod
+            # Install MongoDB from official repository
+            # Import MongoDB public GPG key
+            wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | sudo apt-key add -
             
-            # Wait for MongoDB to start
-            sleep 3
+            # Add MongoDB repository
+            echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
             
-            # Verify MongoDB is running
-            if sudo systemctl is-active --quiet mongod; then
-                print_success "MongoDB service is running"
-                return 0
+            # Update package list
+            sudo apt update
+            
+            # Install MongoDB
+            if sudo apt install -y mongodb-org; then
+                print_success "MongoDB installed successfully from official repository"
             else
-                print_warning "MongoDB service failed to start automatically"
-                print_warning "Please start it manually: sudo systemctl start mongod"
+                print_error "Failed to install MongoDB from official repository"
                 return 1
             fi
+        fi
+        
+        # Start and enable MongoDB service
+        print_status "Starting MongoDB service..."
+        sudo systemctl start mongod
+        sudo systemctl enable mongod
+        
+        # Wait for MongoDB to start
+        sleep 3
+        
+        # Verify MongoDB is running
+        if sudo systemctl is-active --quiet mongod; then
+            print_success "MongoDB service is running"
+            return 0
         else
-            print_error "Failed to install MongoDB"
+            print_warning "MongoDB service failed to start automatically"
+            print_warning "Please start it manually: sudo systemctl start mongod"
             return 1
         fi
     else
