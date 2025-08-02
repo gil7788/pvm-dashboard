@@ -4,17 +4,14 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import indexRouter from './routes/index';
-import usersRouter from './routes/users';
 import postsRouter from './routes/posts';
 import contractsRouter from './routes/contracts';
-import benchmarksRouter from './routes/benchmarks';
-import networksRouter from './routes/networks';
-import deploymentsRouter from './routes/deployments';
 import MongoManager from './MongoManager';
 import { MongoService } from './services/MongoService';
 import { requestLogger } from './middleware/requestLogger';
 import logger from './utils/Logger';
 import config from './env';
+import { swaggerUi, swaggerSpec } from './config/swagger';
 
 const app = express();
 
@@ -28,6 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Initialize MongoDB connection
 const mongoManager = MongoManager.getInstance(config.connectionString, config.dbName);
@@ -50,13 +48,9 @@ app.use(async (req: Request & { mongoService?: any }, res: Response, next: NextF
 });
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/posts', postsRouter);
 app.use('/api', indexRouter);  // API base routes
 app.use('/api/contracts', contractsRouter);
-app.use('/api/benchmarks', benchmarksRouter);
-app.use('/api/networks', networksRouter);
-app.use('/api/deployments', deploymentsRouter);
 
 // Catch 404 and forward to error handler
 app.use(function (req: Request, res: Response, next: NextFunction) {

@@ -1,27 +1,15 @@
 import logger from '../utils/Logger';
 import MongoManager from '../MongoManager';
 import { ContractService } from './ContractService';
-import { NetworkService } from './NetworkService';
-import { BenchmarkService } from './BenchmarkService';
-import { DeploymentService } from './DeploymentService';
-import { BenchmarkRunService } from './BenchmarkRunService';
 
 export class MongoService {
     private static instance: MongoService;
     private mongoManager: MongoManager;
     private contractService: ContractService;
-    private networkService: NetworkService;
-    private benchmarkService: BenchmarkService;
-    private deploymentService: DeploymentService;
-    private benchmarkRunService: BenchmarkRunService;
 
     private constructor(mongoManager: MongoManager) {
         this.mongoManager = mongoManager;
         this.contractService = new ContractService();
-        this.networkService = new NetworkService();
-        this.benchmarkService = new BenchmarkService();
-        this.deploymentService = new DeploymentService();
-        this.benchmarkRunService = new BenchmarkRunService();
     }
 
     public static getInstance(mongoManager: MongoManager): MongoService {
@@ -33,22 +21,6 @@ export class MongoService {
 
     public getContractService(): ContractService {
         return this.contractService;
-    }
-
-    public getNetworkService(): NetworkService {
-        return this.networkService;
-    }
-
-    public getBenchmarkService(): BenchmarkService {
-        return this.benchmarkService;
-    }
-
-    public getDeploymentService(): DeploymentService {
-        return this.deploymentService;
-    }
-
-    public getBenchmarkRunService(): BenchmarkRunService {
-        return this.benchmarkRunService;
     }
 
     public async isConnected(): Promise<boolean> {
@@ -110,4 +82,4 @@ export class MongoService {
             };
         }
     }
-}
+} 

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Contract, Network, Benchmark, Deployment, User } from '../models';
+import { Contract } from '../models/Contract';
 import logger from '../utils/Logger';
 
 // Helper function to generate valid transaction hash
@@ -7,389 +7,403 @@ function generateTransactionHash(): string {
   return '0x' + Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('');
 }
 
-// 🎯 DATABASE SEEDING SCRIPT
-// This script populates the database with sample data for development and testing
-
-const sampleNetworks = [
-  {
-    name: 'Passethub',
-    chainId: '0x1',
-    rpcUrl: 'https://rpc.passethub.com',
-    explorerUrl: 'https://explorer.passethub.com',
-    currency: {
-      symbol: 'PETH',
-      name: 'Passethub Token',
-      decimals: 18
-    },
-    status: 'active' as const,
-    features: {
-      supportsSolidity: true,
-      supportsInk: true,
-      supportsEVM: true,
-      supportsWASM: true
-    },
-    metadata: {
-      description: 'Passethub is a Polkadot parachain that supports both EVM and WASM smart contracts',
-      website: 'https://passethub.com',
-      documentation: 'https://docs.passethub.com',
-      github: 'https://github.com/passethub'
-    }
-  },
-  {
-    name: 'Polkadot',
-    chainId: '0x0',
-    rpcUrl: 'https://rpc.polkadot.io',
-    explorerUrl: 'https://polkascan.io/polkadot',
-    currency: {
-      symbol: 'DOT',
-      name: 'Polkadot',
-      decimals: 10
-    },
-    status: 'active' as const,
-    features: {
-      supportsSolidity: false,
-      supportsInk: true,
-      supportsEVM: false,
-      supportsWASM: true
-    },
-    metadata: {
-      description: 'Polkadot is a heterogeneous multi-chain technology',
-      website: 'https://polkadot.network',
-      documentation: 'https://wiki.polkadot.network',
-      github: 'https://github.com/paritytech/polkadot'
-    }
-  },
-  {
-    name: 'Ethereum',
-    chainId: '0x3',
-    rpcUrl: 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID',
-    explorerUrl: 'https://etherscan.io',
-    currency: {
-      symbol: 'ETH',
-      name: 'Ethereum',
-      decimals: 18
-    },
-    status: 'active' as const,
-    features: {
-      supportsSolidity: true,
-      supportsInk: false,
-      supportsEVM: true,
-      supportsWASM: false
-    },
-    metadata: {
-      description: 'Ethereum is a decentralized platform for smart contracts',
-      website: 'https://ethereum.org',
-      documentation: 'https://docs.ethereum.org',
-      github: 'https://github.com/ethereum'
-    }
-  }
-];
+// 🎯 DATABASE SEEDING SCRIPT - Simplified Model
+// This script populates the database with sample contracts using the new simplified model
 
 const sampleContracts = [
   {
-    name: 'DeFi Lending Protocol',
-    network: 'Passethub',
-    contractType: 'both' as const,
-    solidityAddress: '0x1234567890123456789012345678901234567890',
-    inkAddress: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
-    solidityDeployedTime: new Date('2024-01-15T10:30:00Z'),
-    inkDeployedTime: new Date('2024-01-20T14:45:00Z')
-  },
-  {
-    name: 'NFT Marketplace',
-    network: 'Passethub',
+    name: 'SimpleStorage',
+    description: 'A simple storage contract for demonstration',
     contractType: 'solidity' as const,
-    solidityAddress: '0xabcdef1234567890abcdef1234567890abcdef12',
-    solidityDeployedTime: new Date('2024-02-10T09:15:00Z')
-  },
-  {
-    name: 'DAO Governance',
-    network: 'Polkadot',
-    contractType: 'ink' as const,
-    inkAddress: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
-    inkDeployedTime: new Date('2024-03-05T16:20:00Z')
-  },
-  {
-    name: 'DEX Aggregator',
-    network: 'Ethereum',
-    contractType: 'solidity' as const,
-    solidityAddress: '0x9876543210987654321098765432109876543210',
-    solidityDeployedTime: new Date('2024-01-25T11:00:00Z')
-  }
-];
-
-const sampleUsers = [
-  {
-    username: 'alice_dev',
-    email: 'alice@example.com',
-    walletAddress: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
-    role: 'developer' as const,
-    status: 'active' as const,
-    profile: {
-      firstName: 'Alice',
-      lastName: 'Developer',
-      bio: 'Smart contract developer specializing in DeFi protocols',
-      github: 'https://github.com/alice-dev',
-      twitter: '@alice_dev'
+    sourceCodeHash: 'a'.repeat(64),
+    owner: {
+      username: 'alice',
+      email: 'alice@example.com',
+      walletAddress: '0x1234567890123456789012345678901234567890'
     },
-    preferences: {
-      notifications: {
-        email: true,
-        push: false,
-        benchmarkUpdates: true,
-        deploymentAlerts: true
-      },
-      theme: 'dark' as const,
-      language: 'en' as const
+    network: {
+      name: 'Passethub',
+      chainId: '0x1',
+      rpcUrl: 'https://rpc.passethub.com',
+      type: 'pvm' as const
     },
-    stats: {
-      contractsDeployed: 5,
-      benchmarksRun: 12,
-      totalGasUsed: 1500000,
-      lastActivity: new Date()
+    deployments: [
+      {
+        type: 'solidity' as const,
+        address: '0x9876543210987654321098765432109876543210',
+        transactionHash: generateTransactionHash(),
+        blockNumber: 1234567,
+        gasUsed: 245000,
+        gasPrice: '0x' + 'b'.repeat(16),
+        deployedAt: new Date('2024-01-15'),
+        status: 'success' as const,
+        bytecode: '0x608060405234801561001057600080fd5b50...',
+        bytecodeSize: '12.5 KB',
+        abi: [
+          { "inputs": [], "name": "getBalance", "outputs": [{"name": "", "type": "uint256"}], "stateMutability": "view", "type": "function" },
+          { "inputs": [{"name": "amount", "type": "uint256"}], "name": "deposit", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
+        ],
+        metadata: {
+          compilerVersion: '0.8.19',
+          optimization: true,
+          verificationStatus: 'verified' as const
+        }
+      }
+    ],
+    benchmarks: [
+      {
+        functionName: 'getBalance',
+        contractType: 'solidity' as const,
+        gasUsed: 245000,
+        executionTime: 15,
+        createdAt: new Date('2024-01-16'),
+        completedAt: new Date('2024-01-16'),
+        status: 'completed' as const,
+        results: {
+          gasUsed: 245000,
+          executionTime: 15,
+          storageSize: 32,
+          cost: 0.000245,
+          efficiency: 85
+        },
+        parameters: {
+          inputSize: 0,
+          complexity: 'low',
+          iterations: 1
+        }
+      }
+    ],
+    metadata: {
+      version: '1.0.0',
+      tags: ['storage', 'demo'],
+      sourceUrl: 'https://github.com/example/simple-storage',
+      license: 'MIT'
     }
   },
   {
-    username: 'bob_admin',
-    email: 'bob@example.com',
-    walletAddress: '0x8ba1f109551bD432803012645aac136c772c3a4b',
-    role: 'admin' as const,
-    status: 'active' as const,
-    profile: {
-      firstName: 'Bob',
-      lastName: 'Administrator',
-      bio: 'Platform administrator and network operator',
-      website: 'https://bob-admin.com'
+    name: 'TokenContract',
+    description: 'A token contract supporting both Solidity and ink!',
+    contractType: 'both' as const,
+    sourceCodeHash: 'b'.repeat(64),
+    owner: {
+      username: 'bob',
+      email: 'bob@example.com',
+      walletAddress: '0x2345678901234567890123456789012345678901'
     },
-    preferences: {
-      notifications: {
-        email: true,
-        push: true,
-        benchmarkUpdates: true,
-        deploymentAlerts: true
+    network: {
+      name: 'Passethub',
+      chainId: '0x1',
+      rpcUrl: 'https://rpc.passethub.com',
+      type: 'pvm' as const
+    },
+    deployments: [
+      {
+        type: 'solidity' as const,
+        address: '0x8765432109876543210987654321098765432109',
+        transactionHash: generateTransactionHash(),
+        blockNumber: 1234568,
+        gasUsed: 350000,
+        gasPrice: '0x' + 'b'.repeat(16),
+        deployedAt: new Date('2024-01-17'),
+        status: 'success' as const,
+        bytecode: '0x608060405234801561001057600080fd5b50...',
+        bytecodeSize: '15.2 KB',
+        abi: [
+          { "inputs": [], "name": "totalSupply", "outputs": [{"name": "", "type": "uint256"}], "stateMutability": "view", "type": "function" },
+          { "inputs": [{"name": "to", "type": "address"}, {"name": "amount", "type": "uint256"}], "name": "transfer", "outputs": [{"name": "", "type": "bool"}], "stateMutability": "nonpayable", "type": "function" }
+        ],
+        metadata: {
+          compilerVersion: '0.8.19',
+          optimization: true,
+          verificationStatus: 'verified' as const
+        }
       },
-      theme: 'light' as const,
-      language: 'en' as const
+      {
+        type: 'ink' as const,
+        address: '0x7654321098765432109876543210987654321098',
+        transactionHash: generateTransactionHash(),
+        blockNumber: 1234569,
+        gasUsed: 280000,
+        gasPrice: '0x' + 'b'.repeat(16),
+        deployedAt: new Date('2024-01-18'),
+        status: 'success' as const,
+        bytecode: '0x0061736d0100000001...',
+        bytecodeSize: '10.8 KB',
+        abi: { spec: { messages: [
+          { name: 'total_supply', args: [], returnType: { type: 'u128' } },
+          { name: 'transfer', args: [{ name: 'to', type: 'AccountId' }, { name: 'amount', type: 'u128' }], returnType: { type: 'bool' } }
+        ]}},
+        metadata: {
+          compilerVersion: '4.0.0',
+          optimization: true,
+          verificationStatus: 'verified' as const
+        }
+      }
+    ],
+    benchmarks: [
+      {
+        functionName: 'totalSupply',
+        contractType: 'solidity' as const,
+        gasUsed: 350000,
+        executionTime: 20,
+        createdAt: new Date('2024-01-19'),
+        completedAt: new Date('2024-01-19'),
+        status: 'completed' as const,
+        results: {
+          gasUsed: 350000,
+          executionTime: 20,
+          storageSize: 64,
+          cost: 0.00035,
+          efficiency: 78
+        },
+        parameters: {
+          inputSize: 0,
+          complexity: 'medium',
+          iterations: 1
+        }
+      },
+      {
+        functionName: 'total_supply',
+        contractType: 'ink' as const,
+        gasUsed: 280000,
+        executionTime: 18,
+        createdAt: new Date('2024-01-20'),
+        completedAt: new Date('2024-01-20'),
+        status: 'completed' as const,
+        results: {
+          gasUsed: 280000,
+          executionTime: 18,
+          storageSize: 48,
+          cost: 0.00028,
+          efficiency: 82
+        },
+        parameters: {
+          inputSize: 0,
+          complexity: 'medium',
+          iterations: 1
+        }
+      }
+    ],
+    metadata: {
+      version: '2.0.0',
+      tags: ['token', 'multi-runtime'],
+      sourceUrl: 'https://github.com/example/token-contract',
+      license: 'MIT'
+    }
+  },
+  {
+    name: 'VotingSystem',
+    description: 'A voting system implemented in ink!',
+    contractType: 'ink' as const,
+    sourceCodeHash: 'c'.repeat(64),
+    owner: {
+      username: 'charlie',
+      email: 'charlie@example.com',
+      walletAddress: '0x3456789012345678901234567890123456789012'
     },
-    stats: {
-      contractsDeployed: 2,
-      benchmarksRun: 8,
-      totalGasUsed: 800000,
-      lastActivity: new Date()
+    network: {
+      name: 'Passethub',
+      chainId: '0x1',
+      rpcUrl: 'https://rpc.passethub.com',
+      type: 'pvm' as const
+    },
+    deployments: [
+      {
+        type: 'ink' as const,
+        address: '0x6543210987654321098765432109876543210987',
+        transactionHash: generateTransactionHash(),
+        blockNumber: 1234570,
+        gasUsed: 420000,
+        gasPrice: '0x' + 'b'.repeat(16),
+        deployedAt: new Date('2024-01-21'),
+        status: 'success' as const,
+        bytecode: '0x0061736d0100000001...',
+        bytecodeSize: '18.5 KB',
+        abi: { spec: { messages: [
+          { name: 'create_proposal', args: [{ name: 'description', type: 'String' }], returnType: { type: 'u32' } },
+          { name: 'vote', args: [{ name: 'proposal_id', type: 'u32' }, { name: 'support', type: 'bool' }], returnType: { type: 'bool' } }
+        ]}},
+        metadata: {
+          compilerVersion: '4.0.0',
+          optimization: true,
+          verificationStatus: 'verified' as const
+        }
+      }
+    ],
+    benchmarks: [
+      {
+        functionName: 'create_proposal',
+        contractType: 'ink' as const,
+        gasUsed: 420000,
+        executionTime: 25,
+        createdAt: new Date('2024-01-22'),
+        completedAt: new Date('2024-01-22'),
+        status: 'completed' as const,
+        results: {
+          gasUsed: 420000,
+          executionTime: 25,
+          storageSize: 128,
+          cost: 0.00042,
+          efficiency: 75
+        },
+        parameters: {
+          inputSize: 50,
+          complexity: 'high',
+          iterations: 1
+        }
+      }
+    ],
+    metadata: {
+      version: '1.5.0',
+      tags: ['voting', 'governance'],
+      sourceUrl: 'https://github.com/example/voting-system',
+      license: 'MIT'
+    }
+  },
+  {
+    name: 'DeFi Lending Protocol',
+    description: 'A decentralized lending protocol supporting multiple runtimes',
+    contractType: 'both' as const,
+    sourceCodeHash: 'd'.repeat(64),
+    owner: {
+      username: 'defi_user',
+      email: 'defi@example.com',
+      walletAddress: '0x4567890123456789012345678901234567890123'
+    },
+    network: {
+      name: 'Passethub',
+      chainId: '0x1',
+      rpcUrl: 'https://rpc.passethub.com',
+      type: 'pvm' as const
+    },
+    deployments: [
+      {
+        type: 'solidity' as const,
+        address: '0x1234567890123456789012345678901234567890',
+        transactionHash: generateTransactionHash(),
+        blockNumber: 1234571,
+        gasUsed: 500000,
+        gasPrice: '0x' + 'b'.repeat(16),
+        deployedAt: new Date('2024-01-23'),
+        status: 'success' as const,
+        bytecode: '0x608060405234801561001057600080fd5b50...',
+        bytecodeSize: '25.8 KB',
+        abi: [
+          { "inputs": [{"name": "amount", "type": "uint256"}], "name": "deposit", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+          { "inputs": [{"name": "amount", "type": "uint256"}], "name": "borrow", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
+        ],
+        metadata: {
+          compilerVersion: '0.8.19',
+          optimization: true,
+          verificationStatus: 'verified' as const
+        }
+      },
+      {
+        type: 'ink' as const,
+        address: '0x5432109876543210987654321098765432109876',
+        transactionHash: generateTransactionHash(),
+        blockNumber: 1234572,
+        gasUsed: 380000,
+        gasPrice: '0x' + 'b'.repeat(16),
+        deployedAt: new Date('2024-01-24'),
+        status: 'success' as const,
+        bytecode: '0x0061736d0100000001...',
+        bytecodeSize: '22.1 KB',
+        abi: { spec: { messages: [
+          { name: 'deposit', args: [{ name: 'amount', type: 'u128' }], returnType: { type: 'bool' } },
+          { name: 'borrow', args: [{ name: 'amount', type: 'u128' }], returnType: { type: 'bool' } }
+        ]}},
+        metadata: {
+          compilerVersion: '4.0.0',
+          optimization: true,
+          verificationStatus: 'verified' as const
+        }
+      }
+    ],
+    benchmarks: [
+      {
+        functionName: 'deposit',
+        contractType: 'solidity' as const,
+        gasUsed: 500000,
+        executionTime: 30,
+        createdAt: new Date('2024-01-25'),
+        completedAt: new Date('2024-01-25'),
+        status: 'completed' as const,
+        results: {
+          gasUsed: 500000,
+          executionTime: 30,
+          storageSize: 256,
+          cost: 0.0005,
+          efficiency: 70
+        },
+        parameters: {
+          inputSize: 32,
+          complexity: 'high',
+          iterations: 1
+        }
+      },
+      {
+        functionName: 'deposit',
+        contractType: 'ink' as const,
+        gasUsed: 380000,
+        executionTime: 22,
+        createdAt: new Date('2024-01-26'),
+        completedAt: new Date('2024-01-26'),
+        status: 'completed' as const,
+        results: {
+          gasUsed: 380000,
+          executionTime: 22,
+          storageSize: 192,
+          cost: 0.00038,
+          efficiency: 80
+        },
+        parameters: {
+          inputSize: 16,
+          complexity: 'high',
+          iterations: 1
+        }
+      }
+    ],
+    metadata: {
+      version: '3.0.0',
+      tags: ['defi', 'lending', 'multi-runtime'],
+      sourceUrl: 'https://github.com/example/defi-lending',
+      license: 'MIT'
     }
   }
 ];
 
 async function seedDatabase() {
   try {
-    logger.info('Starting database seeding...');
-
-    // Connect to MongoDB - use same database as backend
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/dev_pvm-dashboard';
+    logger.info('Starting database seeding with simplified model...');
+    
+    // Connect to MongoDB
+    const mongoUri = 'mongodb://localhost:27017/dev_pvm-dashboard';
     await mongoose.connect(mongoUri);
     logger.info('Connected to MongoDB');
-
-    // Clear existing data
-    await Promise.all([
-      Network.deleteMany({}),
-      Contract.deleteMany({}),
-      User.deleteMany({}),
-      Benchmark.deleteMany({}),
-      Deployment.deleteMany({})
-    ]);
-    logger.info('Cleared existing data');
-
-    // Insert networks
-    const networks = await Network.insertMany(sampleNetworks);
-    logger.info(`Inserted ${networks.length} networks`);
-
-    // Insert users
-    const users = await User.insertMany(sampleUsers);
-    logger.info(`Inserted ${users.length} users`);
-
-    // Insert contracts with denormalized data directly
-    const contracts = [];
-    for (let i = 0; i < sampleContracts.length; i++) {
-      const contractData = sampleContracts[i];
-      const owner = users[i % users.length];
-      const network = networks.find(n => n.name === contractData.network);
-      
-      if (!network) {
-        logger.warn(`Network not found for contract ${contractData.name}`);
-        continue;
-      }
-      
-      const contract = new Contract({
-        name: contractData.name,
-        ownerId: owner._id,
-        networkId: network._id,
-        contractType: contractData.contractType,
-        sourceCodeHash: generateTransactionHash().replace('0x', ''),
-        // Denormalized data
-        ownerInfo: {
-          username: owner.username,
-          email: owner.email
-        },
-        networkInfo: {
-          name: network.name,
-          chainId: network.chainId
-        },
-        metadata: {
-          description: `Sample contract: ${contractData.name}`,
-          version: '1.0.0',
-          tags: ['sample', 'test'],
-          sourceUrl: 'https://github.com/example/contracts'
-        }
-      });
-      
+    
+    // Clear existing contracts
+    await Contract.deleteMany({});
+    logger.info('Cleared existing contracts');
+    
+    // Insert contracts with embedded data
+    const createdContracts = [];
+    for (const contractData of sampleContracts) {
+      const contract = new Contract(contractData);
       await contract.save();
-      contracts.push(contract);
+      createdContracts.push(contract);
+      logger.info(`Created contract: ${contract.name}`);
     }
-    logger.info(`Inserted ${contracts.length} contracts`);
-
-    // Create sample deployments based on original contract data
-    const deployments = [];
-    for (let i = 0; i < contracts.length; i++) {
-      const contract = contracts[i];
-      const originalContract = sampleContracts[i];
-      
-      if (originalContract.solidityAddress) {
-        deployments.push({
-          contractId: contract._id,
-          networkId: contract.networkId,
-          deployerId: contract.ownerId,
-          deploymentType: 'solidity' as const,
-          address: originalContract.solidityAddress,
-          transactionHash: generateTransactionHash(),
-          blockNumber: Math.floor(Math.random() * 1000000) + 1000000,
-          gasUsed: Math.floor(Math.random() * 500000) + 100000,
-          gasPrice: '0x' + Math.floor(Math.random() * 1000000000).toString(16),
-          deployedAt: originalContract.solidityDeployedTime,
-          status: 'success' as const,
-          metadata: {
-            compilerVersion: '0.8.19',
-            optimization: true,
-            verificationStatus: 'verified' as const,
-            abi: [
-              {
-                "inputs": [],
-                "name": "getBalance",
-                "outputs": [{"name": "", "type": "uint256"}],
-                "stateMutability": "view",
-                "type": "function"
-              },
-              {
-                "inputs": [{"name": "amount", "type": "uint256"}],
-                "name": "deposit",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-              },
-              {
-                "inputs": [{"name": "amount", "type": "uint256"}],
-                "name": "withdraw",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-              }
-            ],
-            bytecode: '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80632e1a7d4d1461003b578063d0e30db014610057575b600080fd5b610055600480360381019061005091906100c3565b610073565b005b610071600480360381019061006c91906100c3565b61007d565b005b8060008190555050565b8060008190555050565b600080fd5b6000819050919050565b6100a08161008d565b81146100ab57600080fd5b50565b6000813590506100bd81610097565b92915050565b6000602082840312156100d9576100d8610088565b5b60006100e7848285016100ae565b9150509291505056fea2646970667358221220a1b2c3d4e5f67890123456789012345678901234567890123456789012345678964736f6c63430008120033',
-            bytecodeSize: '512 bytes'
-          }
-        });
-      }
-      
-      if (originalContract.inkAddress) {
-        deployments.push({
-          contractId: contract._id,
-          networkId: contract.networkId,
-          deployerId: contract.ownerId,
-          deploymentType: 'ink' as const,
-          address: originalContract.inkAddress,
-          transactionHash: generateTransactionHash(),
-          blockNumber: Math.floor(Math.random() * 1000000) + 1000000,
-          gasUsed: Math.floor(Math.random() * 500000) + 100000,
-          gasPrice: '0x' + Math.floor(Math.random() * 1000000000).toString(16),
-          deployedAt: originalContract.inkDeployedTime,
-          status: 'success' as const,
-          metadata: {
-            compilerVersion: '4.0.0',
-            optimization: true,
-            verificationStatus: 'verified' as const
-          }
-        });
-      }
-    }
-
-    // Insert deployments one by one to ensure hooks are triggered
-    const createdDeployments = [];
-    for (const deploymentData of deployments) {
-      const deployment = new Deployment(deploymentData);
-      await deployment.save();
-      createdDeployments.push(deployment);
-    }
-    logger.info(`Inserted ${createdDeployments.length} deployments`);
-
-    // Create sample benchmarks with deployment references
-    const benchmarks = [];
-    for (const contract of contracts) {
-      // Find deployments for this contract
-      const contractDeployments = createdDeployments.filter(d => (d.contractId as any).toString() === (contract._id as any).toString());
-      
-      if (contractDeployments.length === 0) {
-        logger.warn(`No deployments found for contract ${contract.name}`);
-        continue;
-      }
-      
-      const benchmarkTypes = ['gas', 'execution_time', 'storage', 'comprehensive'];
-      for (const benchmarkType of benchmarkTypes) {
-        // Use a random deployment for this benchmark
-        const deployment = contractDeployments[Math.floor(Math.random() * contractDeployments.length)];
-        const createdAt = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000); // Last 7 days
-        const completedAt = new Date(createdAt.getTime() + Math.random() * 24 * 60 * 60 * 1000); // Up to 24h later
-        
-        benchmarks.push({
-          contractId: contract._id,
-          deploymentId: deployment._id, // Reference to specific deployment
-          requestedBy: contract.ownerId,
-          benchmarkType: benchmarkType as any,
-          results: {
-            gasUsed: Math.floor(Math.random() * 1000000) + 50000,
-            executionTime: Math.random() * 1000 + 100,
-            storageSize: Math.floor(Math.random() * 10000) + 1000,
-            cost: Math.random() * 10 + 0.1,
-            efficiency: Math.random() * 100
-          },
-          parameters: {
-            inputSize: Math.floor(Math.random() * 1000) + 100,
-            complexity: ['low', 'medium', 'high', 'extreme'][Math.floor(Math.random() * 4)],
-            iterations: Math.floor(Math.random() * 1000) + 100
-          },
-          status: 'completed' as const,
-          createdAt: createdAt,
-          completedAt: completedAt,
-          metadata: {
-            compiler: 'solc',
-            optimization: Math.random() > 0.5,
-            environment: 'production',
-            runCount: Math.floor(Math.random() * 10) + 1
-          }
-        });
-      }
-    }
-
-    const createdBenchmarks = await Benchmark.insertMany(benchmarks);
-    logger.info(`Inserted ${createdBenchmarks.length} benchmarks`);
-
-    logger.info('Database seeding completed successfully!');
-    logger.info(`Summary:
-      - Networks: ${networks.length}
-      - Users: ${users.length}
-      - Contracts: ${contracts.length}
-      - Deployments: ${createdDeployments.length}
-      - Benchmarks: ${createdBenchmarks.length}
-    `);
-
+    
+    logger.info(`Successfully seeded database with ${createdContracts.length} contracts`);
+    logger.info('Sample contracts created:');
+    createdContracts.forEach(contract => {
+      logger.info(`- ${contract.name} (${contract.contractType}) on ${contract.network.name}`);
+      logger.info(`  Owner: ${contract.owner.username}`);
+      logger.info(`  Deployments: ${contract.deployments.length}`);
+      logger.info(`  Benchmarks: ${contract.benchmarks.length}`);
+    });
+    
   } catch (error) {
     logger.error('Error seeding database:', error);
     throw error;
@@ -399,17 +413,17 @@ async function seedDatabase() {
   }
 }
 
-// Run the seeding script if this file is executed directly
+// Run seeding if called directly
 if (require.main === module) {
   seedDatabase()
     .then(() => {
-      console.log('✅ Database seeding completed successfully!');
+      logger.info('Database seeding completed successfully!');
       process.exit(0);
     })
     .catch((error) => {
-      console.error('❌ Database seeding failed:', error);
+      logger.error('Database seeding failed:', error);
       process.exit(1);
     });
 }
 
-export { seedDatabase }; 
+export default seedDatabase; 

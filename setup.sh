@@ -237,7 +237,15 @@ install_dependencies() {
     
     print_status "Installing frontend dependencies..."
     cd frontend
-    npm install
+    npm install --legacy-peer-deps
+    if [ $? -ne 0 ]; then
+        print_warning "First install failed, trying with --force..."
+        npm install --force
+        if [ $? -ne 0 ]; then
+            print_error "Failed to install frontend dependencies"
+            exit 1
+        fi
+    fi
     cd ..
     
     print_success "Dependencies installed successfully"

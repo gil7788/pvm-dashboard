@@ -54,40 +54,4 @@ export interface ContractData {
   deployedTime: string;
   solidity?: SolidityContract;
   ink?: InkContract;
-}
-
-export interface CreateContractRequest {
-  name: string;
-  ownerId: string;
-  networkId: string;
-  contractType: "solidity" | "ink" | "both";
-  sourceCodeHash?: string;
-  metadata?: {
-    description?: string;
-    version?: string;
-    tags?: string[];
-    sourceUrl?: string;
-    compiler?: {
-      name: string;
-      version: string;
-    };
-  };
-}
-
-export interface UpdateContractRequest {
-  name?: string;
-  ownerId?: string;
-  networkId?: string;
-  contractType?: "solidity" | "ink" | "both";
-  sourceCodeHash?: string;
-  metadata?: {
-    description?: string;
-    version?: string;
-    tags?: string[];
-    sourceUrl?: string;
-    compiler?: {
-      name: string;
-      version: string;
-    };
-  };
 } 

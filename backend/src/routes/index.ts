@@ -1,13 +1,33 @@
 import express from 'express';
 import contractsRouter from './contracts';
-import networksRouter from './networks';
-import benchmarksRouter from './benchmarks';
-import deploymentsRouter from './deployments';
-import usersRouter from './users';
 
 const router = express.Router();
 
-// API health check
+/**
+ * @swagger
+ * /api:
+ *   get:
+ *     summary: API health check
+ *     description: Returns basic API information and health status
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: API is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "PVM Dashboard API"
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ *                 status:
+ *                   type: string
+ *                   example: "healthy"
+ */
 router.get('/', (req, res) => {
   res.json({
     message: 'PVM Dashboard API',
@@ -16,7 +36,40 @@ router.get('/', (req, res) => {
   });
 });
 
-// API status endpoint
+/**
+ * @swagger
+ * /api/status:
+ *   get:
+ *     summary: Detailed API status
+ *     description: Returns detailed health status including database connectivity
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Detailed status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [healthy, degraded, unhealthy]
+ *                 message:
+ *                   type: string
+ *                 checks:
+ *                   type: object
+ *                   properties:
+ *                     database:
+ *                       type: boolean
+ *                     collections:
+ *                       type: boolean
+ *       500:
+ *         description: Service unavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/status', async (req: any, res) => {
   try {
     const status = await req.mongoService.healthCheck();
@@ -35,9 +88,5 @@ router.get('/status', async (req: any, res) => {
 
 // Register API routes
 router.use('/contracts', contractsRouter);
-router.use('/networks', networksRouter);
-router.use('/benchmarks', benchmarksRouter);
-router.use('/deployments', deploymentsRouter);
-router.use('/users', usersRouter);
 
 export default router;

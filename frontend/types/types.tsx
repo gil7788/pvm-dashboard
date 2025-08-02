@@ -9,7 +9,7 @@ export interface ContractMetadata {
   contractType: "solidity" | "ink" | "both"
 }
 
-export interface ContractFunction {
+export interface ContractFunctionBasic {
   name: string
   gasUsed: string
   runtime: string
@@ -26,7 +26,7 @@ export interface SolidityContract {
     outputs?: Array<{ name: string; type: string }>
     type: string
   }>
-  functions: ContractFunction[]
+  functions: ContractFunctionBasic[]
 }
 
 export interface InkContract {
@@ -43,7 +43,7 @@ export interface InkContract {
       }>
     }
   }
-  functions: ContractFunction[]
+  functions: ContractFunctionBasic[]
 }
 
 export interface ContractData {

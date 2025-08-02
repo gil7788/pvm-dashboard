@@ -1,9 +1,9 @@
 import { ContractsClient } from "./contracts-client"
 import type { ContractMetadata } from "@/types/types"
-import { getBaseUrl } from "@/lib/env"
+import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/env"
 
 async function getContracts(): Promise<ContractMetadata[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
+  const baseUrl = NEXT_PUBLIC_BACKEND_URL
 
   try {
     const res = await fetch(`${baseUrl}/api/contracts`, {
@@ -14,7 +14,24 @@ async function getContracts(): Promise<ContractMetadata[]> {
       throw new Error("Failed to fetch contracts")
     }
 
-    return res.json()
+    const contracts = await res.json()
+    
+    // Transform backend data to frontend expected format
+    return contracts.map((contract: any) => {
+      const solidityDeployment = contract.deployments?.find((d: any) => d.type === 'solidity')
+      const inkDeployment = contract.deployments?.find((d: any) => d.type === 'ink')
+      
+      return {
+        id: contract._id || contract.id,
+        name: contract.name,
+        network: contract.network?.name || 'Unknown', // Extract network name
+        contractType: contract.contractType,
+        solidityAddress: solidityDeployment?.address || null,
+        inkAddress: inkDeployment?.address || null,
+        solidityDeployedTime: solidityDeployment?.deployedAt ? new Date(solidityDeployment.deployedAt).toLocaleDateString() : null,
+        inkDeployedTime: inkDeployment?.deployedAt ? new Date(inkDeployment.deployedAt).toLocaleDateString() : null,
+      }
+    })
   } catch (error) {
     console.error("Error fetching contracts:", error)
     return []
