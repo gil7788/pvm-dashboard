@@ -1,13 +1,12 @@
 import mongoose, { Connection, Document } from 'mongoose';
 import logger from './utils/Logger';
-import config from './env';
+
 
 class MongoManager {
     private static instance: MongoManager;
     private connection: Connection | null = null;
     private isConnecting: boolean = false;
     private connectPromise: Promise<void> | null = null;
-    private retentionService!: RetentionService;
 
     private constructor(private uri: string, private dbName: string) {
         // Configure mongoose
@@ -62,7 +61,6 @@ class MongoManager {
         try {
             await this.connectPromise;
             this.connection = mongoose.connection;
-            this.retentionService = RetentionService.getInstance(this);
         } catch (error) {
             logger.error(`Failed to connect to MongoDB: ${error}`);
             console.error(`Failed to connect to MongoDB: ${error}`);
@@ -173,73 +171,8 @@ class MongoManager {
         }
     }
 
-    public setRetentionDays(days: number): void {
-        if (this.retentionService) {
-            this.retentionService.setRetentionDays(days);
-        }
-    }
-
     public isConnected(): boolean {
         return mongoose.connection.readyState === 1;
-    }
-}
-
-class RetentionService {
-    private static instance: RetentionService;
-    private mongoManager: MongoManager;
-    private retentionDays: number;
-
-    private constructor(mongoManager: MongoManager) {
-        this.mongoManager = mongoManager;
-        this.retentionDays = config.retentionDaysThreshold || 30; // Default to 30 days
-        this.initRetentionJob();
-    }
-
-    public static getInstance(mongoManager: MongoManager): RetentionService {
-        if (!RetentionService.instance) {
-            RetentionService.instance = new RetentionService(mongoManager);
-        }
-        return RetentionService.instance;
-    }
-
-    public async runRetention(): Promise<void> {
-        try {
-            const db = await this.mongoManager.getDb();
-            const collections = await db.listCollections().toArray();
-            
-            for (const collection of collections) {
-                const collectionName = collection.name;
-                // Skip system collections
-                if (!collectionName.startsWith('system.')) {
-                    await this.mongoManager.deleteOlderThan(collectionName, this.retentionDays);
-                }
-            }
-            logger.info('Retention process completed successfully');
-        } catch (error) {
-            logger.error('Retention process failed:', error);
-            throw error;
-        }
-    }
-
-    private initRetentionJob(): void {
-        // Schedule the retention process to run once a day at 3 am
-        // For now, we'll use a simple interval since node-schedule isn't installed
-        setInterval(() => {
-            const now = new Date();
-            if (now.getHours() === 3 && now.getMinutes() === 0) {
-                this.runRetention()
-                    .then(() => {
-                        console.log('Retention process completed successfully.');
-                    })
-                    .catch(error => {
-                        console.error('Retention process failed:', error);
-                    });
-            }
-        }, 60000); // Check every minute
-    }
-
-    public setRetentionDays(days: number): void {
-        this.retentionDays = days;
     }
 }
 

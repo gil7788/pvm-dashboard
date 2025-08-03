@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc && npm run copy-assets",
-    "copy-assets": "cp -R public dist/src/public && cp -R views dist/src/views",
+    "copy-assets": "cp -R public dist/src/public",
     "start": "node ./dist/bin/www",
     "dev": "ts-node bin/www.ts",
     "test": "npx jest",
@@ -20,7 +20,6 @@
     "dotenv": "^16.4.5",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
     "mongodb": "^6.3.0",
     "mongoose": "^8.16.5",
     "morgan": "~1.9.1",
