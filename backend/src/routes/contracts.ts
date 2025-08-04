@@ -21,21 +21,6 @@ type RequestWithService = express.Request & {
  *     summary: Get all contracts
  *     description: Returns a list of all contracts in the system
  *     tags: [Contracts]
- *     responses:
- *       200:
- *         description: List of contracts retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Contract'
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  */
 router.get('/', async (req: any, res) => {
   try {
@@ -53,34 +38,8 @@ router.get('/', async (req: any, res) => {
  * /api/contracts/{id}:
  *   get:
  *     summary: Get contract by ID
- *     description: Returns a detailed contract by its ID
+ *     description: Returns a specific contract by its ID
  *     tags: [Contracts]
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: The ID of the contract to fetch
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Contract retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Contract'
- *       404:
- *         description: Contract not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  */
 router.get('/:id', async (req: any, res) => {
   try {
@@ -104,10 +63,10 @@ router.get('/:id', async (req: any, res) => {
  * /api/contracts/deploy:
  *   post:
  *     summary: Deploy a new contract
- *     description: Creates a new contract from the frontend deployment form
+ *     description: Creates a new contract with deployment data
  *     tags: [Contracts]
  *     requestBody:
- *       required: true 
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -118,38 +77,14 @@ router.get('/:id', async (req: any, res) => {
  *             properties:
  *               contractName:
  *                 type: string
- *                 description: Name of the contract
  *               chain:
  *                 type: string
- *                 description: Network chain (e.g., "Passethub")
  *               solidityAddress:
  *                 type: string
- *                 description: Solidity contract address (optional)
  *               inkAddress:
  *                 type: string
- *                 description: ink! contract address (optional)
  *               description:
  *                 type: string
- *                 description: Contract description (optional)
- *     responses:
- *       201:
- *         description: Contract deployed successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Contract'
- *       400:
- *         description: Invalid request data
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  */
 router.post('/deploy', async (req: any, res) => {
   try {
@@ -255,9 +190,16 @@ router.post('/deploy', async (req: any, res) => {
   }
 });
 
-// ===== AUXILIARY ROUTES (No Swagger documentation) =====
+// ===== AUXILIARY ROUTES =====
 
-// Get contract ABI
+/**
+ * @swagger
+ * /api/contracts/{id}/abi:
+ *   get:
+ *     summary: Get contract ABI
+ *     description: Returns the ABI for both Solidity and ink! contracts
+ *     tags: [Contracts]
+ */
 router.get('/:id/abi', async (req: any, res) => {
   try {
     const { id } = req.params;
@@ -291,7 +233,14 @@ router.get('/:id/abi', async (req: any, res) => {
   }
 });
 
-// Get contract bytecode
+/**
+ * @swagger
+ * /api/contracts/{id}/bytecode:
+ *   get:
+ *     summary: Get contract bytecode
+ *     description: Returns the bytecode for both Solidity and ink! contracts
+ *     tags: [Contracts]
+ */
 router.get('/:id/bytecode', async (req: any, res) => {
   try {
     const { id } = req.params;
@@ -334,7 +283,14 @@ router.get('/:id/bytecode', async (req: any, res) => {
   }
 });
 
-// Get contract functions
+/**
+ * @swagger
+ * /api/contracts/{id}/functions:
+ *   get:
+ *     summary: Get contract functions
+ *     description: Returns the functions available in the contract
+ *     tags: [Contracts]
+ */
 router.get('/:id/functions', async (req: any, res) => {
   try {
     const { id } = req.params;
@@ -386,7 +342,14 @@ router.get('/:id/functions', async (req: any, res) => {
   }
 });
 
-// Get contract analytics
+/**
+ * @swagger
+ * /api/contracts/{id}/analytics:
+ *   get:
+ *     summary: Get contract analytics
+ *     description: Returns analytics data for the contract
+ *     tags: [Contracts]
+ */
 router.get('/:id/analytics', async (req: any, res) => {
   try {
     const { id } = req.params;
@@ -404,7 +367,14 @@ router.get('/:id/analytics', async (req: any, res) => {
   }
 });
 
-// Run benchmark
+/**
+ * @swagger
+ * /api/contracts/{id}/benchmark:
+ *   post:
+ *     summary: Run benchmark
+ *     description: Executes a benchmark test on the contract
+ *     tags: [Contracts]
+ */
 router.post('/:id/benchmark', async (req: any, res) => {
   try {
     const { id } = req.params;
