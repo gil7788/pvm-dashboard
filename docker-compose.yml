@@ -8,30 +8,31 @@ services:
     volumes:
       - mongo_data:/data/db
     environment:
-      MONGO_INITDB_DATABASE: dev_pvm-dashboard
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     
   backend:
     build: ./backend
     environment:
-      # - NODE_ENV=production
-      - MONGO_URI=mongodb://mongo:27017/dev_pvm-dashboard
-      - PORT=3001
+      - NODE_ENV=${NODE_ENV}
+      - MONGO_URI=${MONGO_URI}
+      - PORT=${PORT}
     depends_on:
       - mongo
     ports:
-      - "3001:3001"
+      - "${PORT}:${PORT}"
     volumes:
       - backend_logs:/usr/src/app/logs
-  
+
   frontend:
     build: ./frontend
     environment:
-      - NEXT_PUBLIC_BACKEND_URL=http://backend:3001
+      - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
     depends_on:
       - backend
     ports:
       - "80:3000"
-    
+
 volumes:
   mongo_data:
   backend_logs:

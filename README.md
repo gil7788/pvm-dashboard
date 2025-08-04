@@ -15,11 +15,20 @@ git clone https://github.com/gil7788/pvm-dashboard.git
 cd pvm-dashboard
 git checkout feat/backend
 
-# Start all services
-docker compose up -d
+# Environment Configuration
+cp .env.example .env.development
+# Edit .env.development with your values if needed
+
+# Start all services (Development)
+docker compose --env-file .env.development up -d
+
+# Or for Production
+# cp .env.example .env.production
+# Edit .env.production with your production values
+# docker compose --env-file .env.production up -d
 
 # Seed database with sample data
-docker compose exec backend npm run seed
+docker compose --env-file .env.development exec backend npm run seed
 ```
 
 ### Access the Application
@@ -69,15 +78,71 @@ docker compose exec backend npm run seed
 
 ## Development
 
+## Environment Configuration
+
+### Environment Variables
+
+The project uses environment-specific configuration files:
+
+- **`.env.example`** - Template with all required variables
+- **`.env.development`** - Development environment variables
+- **`.env.production`** - Production environment variables
+
+### Required Variables
+
+#### Backend Variables
+- `MONGO_INITDB_DATABASE` - MongoDB database name
+- `MONGO_URI` - MongoDB connection string
+- `NODE_ENV` - Environment (development/production)
+- `PORT` - Backend server port
+
+#### Frontend Variables
+- `NEXT_PUBLIC_BACKEND_URL` - Backend API URL
+- `NEXT_PUBLIC_BASE_URL` - Frontend base URL
+
+### Environment-Specific Files
+
+#### Development (`.env.development`)
+```bash
+# Database
+MONGO_INITDB_DATABASE=dev_pvm-dashboard
+MONGO_URI=mongodb://mongo:27017/dev_pvm-dashboard
+
+# Backend
+NODE_ENV=development
+PORT=3001
+
+# Frontend
+NEXT_PUBLIC_BASE_URL=http://localhost
+NEXT_PUBLIC_BACKEND_URL=http://backend:3001
+```
+
+#### Production (`.env.production`)
+```bash
+# Database
+MONGO_INITDB_DATABASE=pvm-dashboard
+MONGO_URI=mongodb://mongo:27017/pvm-dashboard
+
+# Backend
+NODE_ENV=production
+PORT=3001
+
+# Frontend
+NEXT_PUBLIC_BASE_URL=https://yourdomain.com
+NEXT_PUBLIC_BACKEND_URL=https://api.yourdomain.com
+```
+
 ### Local Development (without Docker)
 ```bash
 # Backend
 cd backend
+cp .env.example .env
 npm install
 npm run dev
 
 # Frontend (new terminal)
 cd frontend
+cp .env.example .env
 npm install
 npm run dev
 ```
@@ -85,16 +150,28 @@ npm run dev
 ### Database Management
 ```bash
 # Seed database
-docker compose exec backend npm run seed
+docker compose --env-file .env.development exec backend npm run seed
 
 # View logs
-docker compose logs backend
-docker compose logs frontend
+docker compose --env-file .env.development logs backend
+docker compose --env-file .env.development logs frontend
 ```
 
 ### Stop Services
 ```bash
-docker compose down
+docker compose --env-file .env.development down
+```
+
+### Environment Management
+```bash
+# Switch to production
+docker compose --env-file .env.production up -d
+
+# Switch to development
+docker compose --env-file .env.development up -d
+
+# Use custom environment file
+docker compose --env-file .env.custom up -d
 ```
 
 ## Project Structure
