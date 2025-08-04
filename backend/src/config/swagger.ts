@@ -7,7 +7,7 @@ const swaggerDefinition = {
     info: {
         title: 'PVM Dashboard API',
         version: '1.0.0',
-        description: 'Basic API for contract management',
+        description: 'API for Ink! Benchmarch Dashboard',
     },
     servers: [
         {
