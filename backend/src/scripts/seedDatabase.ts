@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Contract } from '../models/Contract';
+import { Contract } from '../types/models/Contract';
 import logger from '../utils/Logger';
 
 // Helper function to generate valid transaction hash

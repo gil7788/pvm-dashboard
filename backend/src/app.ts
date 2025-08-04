@@ -34,14 +34,6 @@ mongoManager.connect()
     logger.error('Failed to connect to MongoDB:', error);
   });
 
-// Extend Request type (best practice)
-declare global {
-  namespace Express {
-    interface Request {
-      mongoService?: MongoService;
-    }
-  }
-}
 
 // Attach the mongoService to each request
 app.use((req: Request, res: Response, next: NextFunction) => {

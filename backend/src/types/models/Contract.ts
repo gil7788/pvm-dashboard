@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-// Interfaces para datos embebidos
+
 interface OwnerInfo {
   username: string;
   email: string;
@@ -55,20 +55,20 @@ interface Benchmark {
   };
 }
 
-// Interface principal del contrato
+
 export interface IContract extends Document {
   name: string;
   description: string;
   contractType: 'solidity' | 'ink' | 'both';
   sourceCodeHash: string;
   
-  // Datos embebidos
+  
   owner: OwnerInfo;
   network: NetworkInfo;
   deployments: Deployment[];
   benchmarks: Benchmark[];
   
-  // Metadata
+  
   metadata: {
     version: string;
     tags: string[];
@@ -76,21 +76,21 @@ export interface IContract extends Document {
     license: string;
   };
   
-  // Timestamps
+  
   createdAt: Date;
   updatedAt: Date;
   
-  // Métodos de instancia
+  
   getLatestDeployment(type: 'solidity' | 'ink'): Deployment | undefined;
   getLatestBenchmark(functionName: string): Benchmark | undefined;
 }
 
-// Interface para métodos estáticos del modelo
+
 export interface IContractModel extends mongoose.Model<IContract> {
   // No static methods needed for now
 }
 
-// Schema simplificado
+
 const ContractSchema = new Schema<IContract>({
   name: {
     type: String,
@@ -120,7 +120,7 @@ const ContractSchema = new Schema<IContract>({
     }
   },
   
-  // Owner embebido
+  
   owner: {
     username: {
       type: String,
@@ -139,7 +139,7 @@ const ContractSchema = new Schema<IContract>({
     }
   },
   
-  // Network embebido
+  
   network: {
     name: {
       type: String,
@@ -163,7 +163,7 @@ const ContractSchema = new Schema<IContract>({
     }
   },
   
-  // Deployments embebidos
+  
   deployments: [{
     type: {
       type: String,
@@ -231,7 +231,7 @@ const ContractSchema = new Schema<IContract>({
     }
   }],
   
-  // Benchmarks embebidos
+  
   benchmarks: [{
     functionName: {
       type: String,
@@ -330,7 +330,7 @@ const ContractSchema = new Schema<IContract>({
   timestamps: true
 });
 
-// Índices para consultas eficientes
+// Indexes for efficient queries
 ContractSchema.index({ 'owner.username': 1 });
 ContractSchema.index({ 'network.name': 1 });
 ContractSchema.index({ 'network.type': 1 });
@@ -338,7 +338,7 @@ ContractSchema.index({ 'deployments.type': 1 });
 ContractSchema.index({ 'benchmarks.status': 1 });
 ContractSchema.index({ createdAt: -1 });
 
-// Métodos de instancia
+
 ContractSchema.methods.getLatestDeployment = function(type: 'solidity' | 'ink') {
   return this.deployments
     .filter((d: any) => d.type === type)

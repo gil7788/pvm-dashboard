@@ -1,4 +1,4 @@
-import { Contract, IContract } from '../models/Contract';
+import { Contract, IContract } from '../types/models/Contract';
 import logger from '../utils/Logger';
 
 export class ContractService {
