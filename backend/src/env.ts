@@ -1,37 +1,63 @@
 import dotenv from 'dotenv';
+import { z } from 'zod';
 
 dotenv.config();
-const environment = (process.env.ENV as 'dev' | 'release') || 'dev';
 
+// Schema to validate .env variables
+const envSchema = z.object({
+  ENV: z.enum(['dev', 'production']),
+  DB_NAME: z.string().min(1, 'DB_NAME is required'),
+  PORT: z.string().default('3001'),
+  DB_URI: z.string().url('DB_URI must be a valid URL'),
+  MONGO_URI: z.string().url('MONGO_URI must be a valid URL').optional(),
+  CONNECTION_STRING: z.string().url('CONNECTION_STRING must be a valid URL').optional(),
+  LOG_DIRECTORY: z.string().default('./logs'),
+});
+
+// Safe parse to handle errors cleanly
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  console.error('❌ Invalid environment variables:', parsed.error.format());
+  process.exit(1);
+}
+
+const env = parsed.data;
+
+// Runtime helpers
+function getRuntimeDatabaseFullName(): string {
+  return `${env.ENV}_${env.DB_NAME}`;
+}
+
+function getDatabaseConnectionString(): string {
+  return `${env.DB_URI}/${getRuntimeDatabaseFullName()}`;
+}
+
+// Strings dictionary
+export const strings = {
+  DEV_ENV: 'dev',
+  PRODUCTION_ENV: 'production',
+};
+
+// Final config object
 interface Config {
-    dbName: string;
-    port: string;
-    env: 'dev' | 'release';
-    connectionString: string;
-    retentionDaysThreshold: number;
+  dbName: string;
+  port: string;
+  env: 'dev' | 'production';
+  connectionString: string;
+  strings: Record<string, string>;
+  logDirectory: string;
 }
 
-const releaseConfig: Config = {
-    dbName: process.env.DB_NAME || 'default_db_name',
-    port: process.env.PORT || '3001',
-    env: environment,
-    connectionString: process.env.CONNECTION_STRING || "mongodb://localhost:27017",
-    retentionDaysThreshold: parseInt(process.env.RETENTION_DAYS_THRESHOLD || '30'),
-}
+const config: Config = {
+  dbName: getRuntimeDatabaseFullName(),
+  port: env.PORT,
+  env: env.ENV,
+  connectionString: getDatabaseConnectionString(),
+  strings,
+  logDirectory: env.LOG_DIRECTORY,
+};
 
-const devConfig: Config = {
-    dbName: getDevDatabaseName(process.env.DB_NAME || 'default_db_name'),
-    port: process.env.PORT || '3001',
-    env: environment,
-    connectionString: process.env.MONGO_URI || "mongodb://localhost:27017",
-    retentionDaysThreshold: parseInt(process.env.RETENTION_DAYS_THRESHOLD || '30'),
-}
-
-function getDevDatabaseName(releaseDatabaseName: string): string {
-    return 'dev_' + releaseDatabaseName;
-}
-
-const config = environment === 'release' ? releaseConfig : devConfig;
-console.log("Config: ", config);
+console.log('✅ Config loaded successfully:', config);
 
 export default config;
