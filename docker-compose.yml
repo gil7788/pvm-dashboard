@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    
+  backend:
+    build: ./backend
+    env_file:
+      - .env.development
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - MONGO_URI=${MONGO_URI}
+      - PORT=${PORT}
+      - DB_NAME=${DB_NAME}
+      - ENV=${ENV}
+      - DB_URI=${DB_URI}
+      - LOG_DIRECTORY=${LOG_DIRECTORY}
+    depends_on:
+      - mongo
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - ${LOG_DIRECTORY}:/usr/src/app/logs
+
+  frontend:
+    build: ./frontend
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+    depends_on:
+      - backend
+    ports:
+      - "80:3000"
+
+volumes:
+  mongo_data:
+  backend_logs:
